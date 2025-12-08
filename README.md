@@ -29,14 +29,14 @@ print("Hello World");
 ```
 #### Generics 
 ```quark 
-
+T add<T>(T a, T b) {
+    return a + b;
+}
 ```
 
 
-## Examples
+## Learn More
 
-See source files in [lib/](lib/) for examples or the current [test file](test/main.qk) or
-visit [quar.k.vu](https://quar.k.vu) for documentation.
+See the [standard library](lib/) for examples of the language in use or visit the [docs](https://quar.k.vu/docs.html).
 
-## Hello World
 
