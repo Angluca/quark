@@ -1,4 +1,4 @@
-#include "clargs.c"
+#include "clargs.h"
 #include "compiler/block.c"
 #include "helpers.h"
 

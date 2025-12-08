@@ -1,5 +1,5 @@
-#ifndef CLARGS
-#define CLARGS
+#ifndef CLARGS_H
+#define CLARGS_H
 
 #include <stdio.h>
 #include <stdlib.h>
