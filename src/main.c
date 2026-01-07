@@ -40,7 +40,7 @@ FunctionDeclaration* entry_declaration() {
     return declaration;
 }
 
-char* library_path = ".";
+char* global_library_path = ".";
 
 int main(int argc, char** argv) {
     char* name = clname(argc, argv);
@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
             break;
         case 'o': output_file = clarg();
             break;
-        case 'l': library_path = clarg();
+        case 'l': global_library_path = clarg();
             break;
         default: panicf("unknown flag '-%c'\n", flag);
         }

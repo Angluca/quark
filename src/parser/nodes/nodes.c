@@ -1,4 +1,4 @@
-#include "../nodes.h"
+#include "nodes.h"
 
 NodeArena global_node_arena = { 0 };
 NodeVector global_unused_nodes = { 0 };

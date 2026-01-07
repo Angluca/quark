@@ -35,8 +35,6 @@ Node* lefthand_expression(Parser* parser) {
                 }
             }
 
-            // TODO: unit tests
-
             if(!use_existing_info) {
                 info = new_identifier(token, parser, 0);
             }

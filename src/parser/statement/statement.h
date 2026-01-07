@@ -8,4 +8,6 @@ NodeVector collect_until(Parser* parser, Node* (*supplier)(Parser*), char separa
 
 Node* statement(Parser* parser);
 
+extern char* global_library_path;
+
 #endif

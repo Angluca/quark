@@ -42,6 +42,10 @@ struct Token;
 enum {
     KeywordActionNone,
     KeywordActionSelf,
+
+    KeywordActionStatement = 1 << 2,
+    KeywordControlSingleCond,
+    KeywordControlTripleCond,
 };
 
 typedef struct Keyword {
