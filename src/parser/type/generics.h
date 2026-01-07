@@ -6,7 +6,7 @@
 
 Type* wrap_applied_generics(Type* type, TypeVector generics, Declaration* declaration);
 
-void assign_generics(struct Wrapper* variable, Parser* parser);
+void assign_generics(Wrapper* variable, Parser* parser);
 
 typedef Vector(Declaration**) DeclarationSetterVector;
 
@@ -21,6 +21,5 @@ GenericsCollection collect_generics(Parser* parser);
 void assign_generics_to_declaration(Declaration* declaration, GenericsCollection collection);
 
 void close_generics_declaration(Declaration* declaration);
-
 
 #endif

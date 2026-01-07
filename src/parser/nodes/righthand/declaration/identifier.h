@@ -7,7 +7,7 @@ typedef struct Identifier {
     String base;
     Declaration* parent_scope;
     Declaration* parent_declaration;
-    bool external : 1;
+    bool is_external : 1;
 } Identifier;
 
 #endif

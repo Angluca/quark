@@ -7,6 +7,7 @@
 
 typedef struct Scope {
     NODE_FIELDS;
+    NodeVector children;
     HashMap(Declaration*) variables;
     DeclarationVector hoisted_declarations;
     Declaration* parent;

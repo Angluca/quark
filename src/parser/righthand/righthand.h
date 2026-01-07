@@ -6,10 +6,10 @@
 
 enum {
     RightBinary,
-    RightAltBinary,
+    RightPostfixOrBinary,
     RightDeclaration,
     RightAssignment,
-    RightIncDec,
+    RightPostfixAssignment,
     RightCall,
     RightFieldAccess,
     RightCompare,
@@ -17,8 +17,12 @@ enum {
     RightOptional,
 };
 
+typedef struct RighthandOperator {
+    unsigned char precedence: 4,
+            type            : 4;
+} RighthandOperator;
 
-
+extern RighthandOperator global_righthand_operator_table[];
 extern bool global_righthand_collecting_type_arguments;
 
 Node* expression(Parser* parser);

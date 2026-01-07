@@ -1,0 +1,11 @@
+#ifndef FUNCTION_DECLARATION_H
+#define FUNCTION_DECLARATION_H
+
+#include "../../nodes/nodes.h"
+#include "../../parser.h"
+
+#include "identifier.h"
+
+Node* parse_function_declaration(Type* return_type, IdentifierInfo info, Parser* parser);
+
+#endif

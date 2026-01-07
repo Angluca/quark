@@ -6,4 +6,6 @@
 
 NodeVector collect_until(Parser* parser, Node* (*supplier)(Parser*), char separator, char terminator);
 
+Node* statement(Parser* parser);
+
 #endif
