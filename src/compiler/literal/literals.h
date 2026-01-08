@@ -9,4 +9,6 @@ void comp_Missing(void* void_self, String* line, Compiler* compiler);
 
 void comp_External(void* void_self, String* line, Compiler* compiler);
 
+void comp_StructLiteral(void* void_self, String* line, Compiler* compiler);
+
 #endif

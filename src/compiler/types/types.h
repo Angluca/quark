@@ -9,4 +9,6 @@ void comp_FunctionType(void* void_self, String* line, Compiler* compiler);
 
 void comp_GenericReference(void* void_self, String* line, Compiler* compiler);
 
+void comp_StructType(void* void_self, String* line, Compiler* compiler);
+
 #endif

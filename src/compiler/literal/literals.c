@@ -21,3 +21,20 @@ void comp_External(void* void_self, String* line, Compiler* compiler) {
 
     strf(line, "%.*s", PRINT(self->data));
 }
+
+void comp_StructLiteral(void* void_self, String* line, Compiler* compiler) {
+    StructLiteral* const self = void_self;
+
+    strf(line, "(");
+    compile(self->type, line, compiler);
+    strf(line, ") {");
+
+    for(size_t i = 0; i < self->field_names.size; i++) {
+        strf(line, i ? ", " : " ");
+        if(self->field_names.data[i].size) {
+            strf(line, ".%.*s = ", PRINT(self->field_names.data[i]));
+        }
+        compile(self->field_values.data[i], line, compiler);
+    }
+    strf(line, " }");
+}

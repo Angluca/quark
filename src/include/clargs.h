@@ -7,13 +7,13 @@
 
 #define panicf(fmt...) (fprintf(stderr, "\33[31;1merror:\33[0m " fmt), exit(EXIT_FAILURE))
 
-extern int argc;
-extern const char** argv;
+extern int global_argc;
+extern char** global_argv;
 
-const char* clname(int local_argc, nonnull const char** local_argv);
+char* clname(int argc, char** argv);
 
 int clflag();
 
-const char* clarg();
+char* clarg();
 
 #endif

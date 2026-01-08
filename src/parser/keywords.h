@@ -10,4 +10,6 @@ typedef HashMap(Keyword) KeywordTable;
 
 extern KeywordTable global_keyword_table;
 
+void populate_keyword_table();
+
 #endif

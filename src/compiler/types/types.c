@@ -45,3 +45,12 @@ void comp_GenericReference(void* void_self, String* line, Compiler* compiler) {
     GenericReference* const self = void_self;
     compile(last(self->generics_declaration->generics.type_arguments_stack).data[self->index], line, compiler);
 }
+
+void comp_StructType(void* void_self, String* line, Compiler* compiler) {
+    (void) compiler;
+    StructType* self = void_self;
+
+    strf(line, "struct ");
+    compile_identifier(self->parent->identifier, line);
+}
+

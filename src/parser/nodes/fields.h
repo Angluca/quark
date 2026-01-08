@@ -6,7 +6,7 @@
 #include "../../tokenizer/tokenizer.h"
 
 #define NODE_FIELDS \
-    uint32_t id; \
+    NodeID id; \
     uint32_t flags; \
     Trace trace; \
     Type* type

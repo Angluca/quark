@@ -5,7 +5,6 @@
 
 KeywordTable global_keyword_table = 0;
 
-// TODO: call in main()
 void populate_keyword_table() {
     put(&global_keyword_table, String("auto"), (Keyword) { KeywordActionNone, &keyword_auto });
     put(&global_keyword_table, String("int"), (Keyword) { KeywordActionNone, &keyword_int });

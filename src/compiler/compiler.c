@@ -6,6 +6,7 @@
 #include "righthand/declaration/function_declaration.h"
 #include "righthand/declaration/variable_declaration.h"
 #include "statement/scope.h"
+#include "statement/statement.h"
 #include "types/types.h"
 
 String new_line(Compiler* const compiler) {
@@ -29,6 +30,11 @@ void compile(void* void_node, String* line, Compiler* compiler) {
         [NodePointerType] = &comp_PointerType,
         [NodeFunctionType] = &comp_FunctionType,
         [NodeFunctionDeclaration] = &comp_FunctionDeclaration,
+        [NodeStatementWrapper] = &comp_StatementWrapper,
+        [NodeReturnStatement] = &comp_ReturnStatement,
+        [NodeControlStatement] = &comp_ControlStatement,
+        [NodeStructType] = &comp_StructType,
+        [NodeStructLiteral] = &comp_StructLiteral,
     };
 
     Node* const node = void_node;

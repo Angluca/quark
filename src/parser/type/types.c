@@ -3,6 +3,10 @@
 #include "stringify_type.h"
 #include "../compiler/compiler.h"
 
+bool global_in_compiler_step = false;
+Compiler* global_compiler_context = NULL;
+ActionVector global_actions = { 0 };
+
 Type* new_type(Type type) {
     type.flags |= fType;
     Type* box = (void*) new_node((Node) { .Type = type });

@@ -7,7 +7,7 @@
 #include "../../tokenizer/tokenizer.h"
 #include "fields.h"
 
-enum {
+typedef enum : uint32_t {
     NodeNone,
 
     NodeWrapper = 1 << 2,
@@ -30,7 +30,7 @@ enum {
     NodeStatementWrapper,
     NodeReturnStatement,
     NodeControlStatement,
-};
+} NodeID;
 
 enum {
     fType = 1 << 0,
