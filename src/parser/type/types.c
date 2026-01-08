@@ -1,5 +1,7 @@
 #include "types.h"
+
 #include "stringify_type.h"
+#include "../compiler/compiler.h"
 
 Type* new_type(Type type) {
     type.flags |= fType;
@@ -11,6 +13,8 @@ Type* new_type(Type type) {
 // TODO: possibly move actions to their own file
 bool apply_action(const Action action, const unsigned flags) {
     switch(action.type) {
+        case ActionNone: return false;
+
         case ActionApplyGenerics: {
             for(size_t i = 0; i < action.generics.size; i++) {
                 if(action.generics.data[i]->id == WrapperAuto
@@ -38,7 +42,7 @@ bool apply_action(const Action action, const unsigned flags) {
 
                 if(!get(action.target->generics.unique_combinations, unique_key)) {
                     put(&action.target->generics.unique_combinations, unique_key);
-                    action.target->generics.monomorphic_compiler(action.target, NULL, global_compiler_context);
+                    compile(action.target, NULL, global_compiler_context);
                 }
             }
 

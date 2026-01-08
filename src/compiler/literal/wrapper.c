@@ -1,0 +1,48 @@
+#include "wrapper.h"
+
+#include "../../parser/type/types.h"
+#include "../righthand/declaration/identifier.h"
+
+void comp_Variable(void* void_self, String* line, Compiler* compiler) {
+    Wrapper* const self = void_self;
+    const bool applied_action = apply_action(self->action, 0);
+
+    Node* const const_value = self->Variable.declaration->const_value;
+    if(const_value && const_value->flags & fConstExpr) {
+        if(!(self->flags & fType)) {
+            strf(line, "(");
+            compile(self->type, line, compiler);
+            strf(line, ") ");
+        }
+
+        compile(const_value, line, compiler);
+    } else {
+        compile_identifier(self->Variable.declaration->identifier, line);
+    }
+
+    if(applied_action) remove_action(self->action, 0);
+}
+
+void comp_Auto(void* void_self, String* line, Compiler* compiler) {
+    Wrapper* const self = void_self;
+    const bool applied_action = apply_action(self->action, 0);
+
+    if(!self->Auto.ref) {
+        strf(line, self->flags & fNumeric ? "int" : "/* auto */ int");
+    } else {
+        compile(self->Auto.ref, line, compiler);
+    }
+
+    if(applied_action) remove_action(self->action, 0);
+}
+
+void comp_Surround(void* void_self, String* line, Compiler* compiler) {
+    Wrapper* const self = void_self;
+    const bool applied_action = apply_action(self->action, 0);
+
+    strf(line, self->Surround.no_parenthesis_wrap ? "%.*s" : "(%.*s", PRINT(self->Surround.prefix));
+    compile(self->Surround.child, line, compiler);
+    strf(line, self->Surround.no_parenthesis_wrap ? "%.*s" : "%.*s)", PRINT(self->Surround.postfix));
+
+    if(applied_action) remove_action(self->action, 0);
+}

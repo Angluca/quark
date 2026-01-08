@@ -2,6 +2,7 @@
 #define NODES_H
 
 #include <stdint.h>
+#include <vector.h>
 
 #include "../../tokenizer/tokenizer.h"
 #include "fields.h"
@@ -38,8 +39,7 @@ enum {
     fMutable = 1 << 3,
     fIgnoreStatement = 1 << 4,
     fStatementTerminated = 1 << 5,
-    fExternal = 1 << 6,
-    fNumeric = 1 << 7,
+    fNumeric = 1 << 6,
 };
 
 #include "righthand/declaration/identifier.h"
