@@ -1,7 +1,7 @@
 #include "structure.h"
 #include "../type/types.h"
 #include "../righthand/righthand.h"
-#include "../righthand/declaration/declarations.h"
+#include "../righthand/declaration/declaration.h"
 
 // TODO: add `Trace trace` argument for info.trace (or `IdentifierInfo info` argument)
 Node* parse_struct_literal(Type* const wrapped_struct_type, Parser* parser) {

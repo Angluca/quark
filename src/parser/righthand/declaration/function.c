@@ -83,7 +83,7 @@ Node* parse_function_declaration(Type* return_type, IdentifierInfo info, Parser*
     }
     free(argument_declarations.data);
 
-    if(!(declaration->flags & fExternal)) {
+    if(!declaration->identifier.is_external) {
         expect(parser->tokenizer, '{');
         declaration->body->children = collect_until(parser, &statement, 0, '}');
     }
@@ -92,5 +92,5 @@ Node* parse_function_declaration(Type* return_type, IdentifierInfo info, Parser*
     pop(&parser->stack);
 
     return (void*) variable_of((void*) declaration, declaration->trace,
-                               fIgnoreStatement | fStatementTerminated * !(declaration->flags & fExternal));
+                               fIgnoreStatement | fStatementTerminated * !declaration->identifier.is_external);
 }

@@ -11,6 +11,10 @@ typedef enum : uint32_t {
     NodeNone,
 
     NodeWrapper = 1 << 2,
+    WrapperVariable = NodeWrapper + 1,
+    WrapperAuto,
+    WrapperSurround,
+
     NodeFunctionType = 1 << 3,
     NodePointerType,
     NodeGenericReference,

@@ -1,12 +1,12 @@
 OUT = qc
-recursive_wildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2)) $(wildcard $1$2)
-SRCS := $(call recursive_wildcard,./,*.c)
+SRCS := $(wildcard src/*.c) $(wildcard src/*/*.c) $(wildcard src/*/*/*.c) $(wildcard src/*/*/*/*.c)
 CFLAGS = -I./src/include -Wall -g -ggdb -Wno-missing-braces -Wno-char-subscripts
 
 build: $(SRCS)
 	$(CC) $(CFLAGS) $(SRCS) -o $(OUT)
 
 build-debug: $(SRCS)
+	echo $(SRCS)
 	$(CC) $(CFLAGS) $(SRCS) -o $(OUT) -g -DEBUG
 
 all: build

@@ -1,10 +1,11 @@
 #include "identifier.h"
 #include "../../statement/scope.h"
+#include "../../type/types.h"
 
 IdentifierInfo new_identifier(Token base_identifier, Parser* parser, const unsigned flags) {
-    bool external = false;
+    bool is_external = false;
     if(streq(base_identifier.trace.source, String("extern"))) {
-        external = true;
+        is_external = true;
         base_identifier = expect(parser->tokenizer, TokenIdentifier);
     }
 
@@ -12,7 +13,7 @@ IdentifierInfo new_identifier(Token base_identifier, Parser* parser, const unsig
         .identifier = {
             .base = base_identifier.trace.source,
             .parent_scope = last(parser->stack)->parent,
-            .external = external,
+            .is_external = is_external,
         },
         .value = flags & IdentifierDeclaration ? NULL : find_on_stack(parser->stack, base_identifier.trace),
         .declaration_scope = last(parser->stack),
@@ -21,7 +22,7 @@ IdentifierInfo new_identifier(Token base_identifier, Parser* parser, const unsig
 
 compound_start:
     if(info.value) {
-        assign_generics(info.value, parser);
+        apply_type_arguments(info.value, parser);
     } else if(flags & IdentifierDeclaration) {
         info.generics_collection = collect_generics(parser);
     }

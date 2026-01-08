@@ -8,12 +8,6 @@
 #include "../type/clash_types.h"
 #include "../type/types.h"
 
-static void optional_struct_declaration_compiler(void* self, String* line, Compiler* compiler) {
-    (void) self;
-    (void) line;
-    (void) compiler;
-}
-
 Node* parse_optional_coalescing(Node* lefthand, Parser* parser) {
     static VariableDeclaration optional_struct_declaration = {
         .id = NodeVariableDeclaration,
@@ -24,7 +18,6 @@ Node* parse_optional_coalescing(Node* lefthand, Parser* parser) {
         },
         .generics = {
             .base_type_arguments = { .size = 1 },
-            .monomorphic_compiler = &optional_struct_declaration_compiler,
         },
     };
 

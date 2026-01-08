@@ -25,13 +25,6 @@ typedef struct Action {
     Declaration* target;
 } Action;
 
-// TODO: Maybe make `NodeWrapper` a flag rather than this confusing type
-enum {
-    WrapperVariable = NodeWrapper + 1,
-    WrapperAuto,
-    WrapperSurround,
-};
-
 typedef struct Wrapper {
     NODE_FIELDS;
 

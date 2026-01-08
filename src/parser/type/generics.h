@@ -6,7 +6,7 @@
 
 Type* wrap_applied_generics(Type* type, TypeVector generics, Declaration* declaration);
 
-void assign_generics(Wrapper* variable, Parser* parser);
+void apply_type_arguments(Wrapper* variable, Parser* parser);
 
 typedef Vector(Declaration**) DeclarationSetterVector;
 

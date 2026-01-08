@@ -1,4 +1,4 @@
-#include "../identifier.h"
+#include "identifier.h"
 
 #include "../../../parser/type/stringify_type.h"
 

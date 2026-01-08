@@ -3,7 +3,7 @@
 #include "types.h"
 
 #include "../righthand/righthand.h"
-#include "../righthand/declaration/declarations.h"
+#include "../righthand/declaration/declaration.h"
 #include "../statement/statement.h"
 #include "../statement/scope.h"
 

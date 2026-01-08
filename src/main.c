@@ -28,8 +28,6 @@ FunctionDeclaration* entry_declaration() {
     return declaration;
 }
 
-char* global_library_path = ".";
-
 int main(int argc, char** argv) {
     char* const name = clname(argc, argv);
     (void) name;

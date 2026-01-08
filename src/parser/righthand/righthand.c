@@ -48,7 +48,6 @@ Node* expression(Parser* parser) {
 
 Node* righthand_expression(Node* lefthand, Parser* parser, unsigned char precedence) {
     RighthandOperator operator;
-outer_while:
     while((operator = global_righthand_operator_table[parser->tokenizer->current.type]).precedence) {
         if(operator.precedence >= precedence + (operator.type == RightAssignment)) break;
         if(operator.precedence == 6 && global_righthand_collecting_type_arguments) break;
@@ -107,6 +106,8 @@ outer_while:
             case RightFieldAccess:
                 lefthand = parse_field_access(lefthand, parser);
                 break;
+
+            default: unreachable();
         }
     }
 
