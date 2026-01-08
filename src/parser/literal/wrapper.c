@@ -6,7 +6,7 @@ Wrapper* variable_of(Declaration* declaration, const Trace trace, unsigned long 
 
     return (void*) new_node((Node) {
         .Wrapper = {
-            .id = NodeWrapper,
+            .id = WrapperVariable,
             .flags = flags,
             .trace = trace,
             .type = declaration->type,

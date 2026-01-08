@@ -11,6 +11,7 @@ Node* statement(Parser* parser) {
         Keyword* const keyword_info = get(global_keyword_table, token->trace.source);
         if(keyword_info) {
             token->identifier.is_keyword = true;
+            token->identifier.searched_keyword = true;
             token->identifier.keyword = *keyword_info;
 
             if(keyword_info->specific_action & KeywordActionStatement) {

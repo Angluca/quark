@@ -50,6 +50,7 @@ enum {
 
 typedef struct Keyword {
     unsigned specific_action;
+
     union Node* (*consumer)(struct Token, struct Parser*);
 } Keyword;
 
@@ -60,7 +61,8 @@ typedef struct Token {
     union {
         struct {
             Keyword keyword;
-            bool is_keyword : 1;
+            bool is_keyword         : 1,
+                    searched_keyword: 1;
         } identifier;
     };
 } Token;

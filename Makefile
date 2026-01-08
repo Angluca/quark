@@ -6,7 +6,6 @@ build: $(SRCS)
 	$(CC) $(CFLAGS) $(SRCS) -o $(OUT)
 
 build-debug: $(SRCS)
-	echo $(SRCS)
 	$(CC) $(CFLAGS) $(SRCS) -o $(OUT) -g -DEBUG
 
 all: build

@@ -13,7 +13,7 @@
 #include "../keywords.h"
 
 Node* lefthand_expression(Parser* parser) {
-    const Token token = next(parser->tokenizer);
+    Token token = next(parser->tokenizer);
 
     switch(token.type) {
         case TokenNumber: return (void*) numeric_literal_from_token(token);
@@ -21,6 +21,14 @@ Node* lefthand_expression(Parser* parser) {
         case TokenIdentifier: {
             bool use_existing_info = false;
             IdentifierInfo info = {};
+
+            if(!token.identifier.searched_keyword) {
+                Keyword* const keyword_info = get(global_keyword_table, token.trace.source);
+                if(keyword_info) {
+                    token.identifier.is_keyword = true;
+                    token.identifier.keyword = *keyword_info;
+                }
+            }
 
             if(token.identifier.is_keyword) {
                 switch(token.identifier.keyword.specific_action) {

@@ -20,8 +20,14 @@
     push(&(**(map))[fnv1a_u32_hash(key) % MAP_SIZE], ((typeof(*(**(map))->data)) { key, value })); \
 } while(0)
 
-void* hashmap__get(void* map, String key, size_t size);
+typedef Vector(void)* hashmap__SearchSection;
 
-#define get(map, key) ((typeof((*(map))->data->v)*) hashmap__get((void*)(map), key, sizeof(*(*(map))->data)))
+void* hashmap__search_section(hashmap__SearchSection section, String key, size_t size);
+
+// #define get(map, key) ((typeof((*(map))->data->v)*) hashmap__get((void*)(map), key, \
+//     (map) ? (size_t) &(*(map))[1] - (size_t)(map) : 0))
+#define get(map, key) ((typeof((*(map))->data->v)*) hashmap__search_section(\
+    (map) ? (void*) &(*(map))[fnv1a_u32_hash(key) % MAP_SIZE] : NULL, key, \
+    (map) ? (size_t) (&(*(map))->data[1]) - (size_t) (*(map))->data : 0))
 
 #endif

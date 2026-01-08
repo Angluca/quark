@@ -62,6 +62,9 @@ int main(int argc, char** argv) {
         panicf("unable to read file '%s': %s\n", input_files.data[0], strerror(errno));
     }
 
+    // TODO: flag to specify initial size
+    init_node_arena(2048);
+
     MessageVector messages = { 0 };
     Tokenizer tokenizer = new_tokenizer(input_files.data[0], input_content, &messages);
     Parser parser = { &tokenizer };
