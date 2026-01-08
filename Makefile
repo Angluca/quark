@@ -1,9 +1,8 @@
 OUT = qc
-# TODO: Make this platform independent
-SRCS := $(shell find . -name "*.c")
+recursive_wildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2)) $(wildcard $1$2)
+SRCS := $(call recursive_wildcard,./,*.c)
 CFLAGS = -I./src/include -Wall -g -ggdb -Wno-missing-braces -Wno-char-subscripts
 
-# TODO: a release build target
 build: $(SRCS)
 	$(CC) $(CFLAGS) $(SRCS) -o $(OUT)
 
