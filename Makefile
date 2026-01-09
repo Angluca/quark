@@ -1,19 +1,22 @@
+# CLion source config
+SRCS := $(wildcard src/*.c) $(wildcard src/*/*.c) $(wildcard src/*/*/*.c) $(wildcard src/*/*/*/*.c) \
+	$(wildcard unit-tests/*/*.c)
+
+BSRCS := $(wildcard src/*.c) $(wildcard src/*/*.c) $(wildcard src/*/*/*.c) $(wildcard src/*/*/*/*.c)
+UT_SRCS := unit-tests/main.c $(wildcard src/*/*.c) $(wildcard src/*/*/*.c) $(wildcard src/*/*/*/*.c)
+CFLAGS := -Isrc/include -Isrc -Wall -Wno-missing-braces -Wno-char-subscripts
 OUT = qc
-SRCS := $(wildcard src/*.c) $(wildcard src/*/*.c) $(wildcard src/*/*/*.c) $(wildcard src/*/*/*/*.c)
-CFLAGS = -I./src/include -Wall -g -ggdb -Wno-missing-braces -Wno-char-subscripts
 
 build: $(SRCS)
-	$(CC) $(CFLAGS) $(SRCS) -o $(OUT)
+	$(CC) $(CFLAGS) $(BSRCS) -o $(OUT)
 
 build-debug: $(SRCS)
-	$(CC) $(CFLAGS) $(SRCS) -o $(OUT) -g -DEBUG
+	$(CC) $(CFLAGS) $(BSRCS) -o $(OUT) -g -ggdb -DEBUG
 
-all: build
+all: build test
 
-test: build
-	./qc test/main.qk -o test/main.c
-	$(CC) test/main.c -o test/main -Wno-parentheses-equality
-	./test/main
+test: unit-tests/main.c
+	$(CC) $(CFLAGS) $(UT_SRCS) -o unit-tests/unit-tests
 
 clean:
 	rm $(OUT)

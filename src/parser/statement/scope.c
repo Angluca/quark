@@ -10,7 +10,6 @@ Scope* new_scope(Declaration* const parent) {
     });
 
     if(!scope->parent) scope->parent = (void*) scope;
-
     return scope;
 }
 

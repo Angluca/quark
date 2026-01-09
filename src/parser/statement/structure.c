@@ -9,9 +9,12 @@ Node* parse_struct_literal(Type* const wrapped_struct_type, Parser* parser) {
     StructType* const struct_type = (void*) opened.type;
 
     // TODO: error message if not struct
-    if(struct_type->id == NodeStructType) {
+    if(struct_type->id != NodeStructType) {
+        push(parser->tokenizer->messages,
+             REPORT_ERR(wrapped_struct_type->trace, String("creating structure literal with a non-structure type")));
+
         close_type(opened.actions, 0);
-        return NULL;
+        return (void*) wrapped_struct_type;
     }
 
     StructLiteral* struct_literal = (void*) new_node((Node) {

@@ -203,10 +203,10 @@ static int try_compare_same_declarations(Declaration* type_declaration, const Ac
     TypeVector follower_generics = find_last_generic_action(follower_actions, follower_declaration);
 
     // TODO: may be incorrect
-    if(!type_generics.size) {
+    if(!type_generics.size && type_declaration->generics.base_type_arguments.size) {
         type_generics = type_declaration->generics.type_arguments_stack.data[0];
     }
-    if(!follower_generics.size) {
+    if(!follower_generics.size && follower_declaration->generics.base_type_arguments.size) {
         follower_generics = follower_declaration->generics.type_arguments_stack.data[0];
     }
 

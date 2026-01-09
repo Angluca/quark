@@ -3,10 +3,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+struct str { char* data; size_t size; };
 
 int main();
 
 
 int main() {
-    int const x = 15;
+    struct str x = (struct str) { "Hello World", 11 };
 }

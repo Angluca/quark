@@ -1,3 +1,6 @@
-type Type = int;
+struct str {
+    extern int char* data;
+    extern int size_t size;
+}
 
-const Type x = 15;
+const auto x = "Hello World";

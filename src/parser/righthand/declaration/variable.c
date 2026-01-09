@@ -22,8 +22,8 @@ Node* parse_variable_declaration(Type* type, IdentifierInfo info, Parser* parser
 
     if(type->flags & fConst && try(parser->tokenizer, '=', 0)) {
         declaration->const_value = righthand_expression(lefthand_expression(parser), parser, 14);
-        clash_types(declaration->type, declaration->const_value->type, declaration->trace, parser->tokenizer->messages,
-                    0);
+        clash_types(declaration->type, declaration->const_value->type, declaration->trace,
+                    parser->tokenizer->messages, 0);
     }
 
     return (void*) variable_of((void*) declaration, declaration->trace, fIgnoreStatement);

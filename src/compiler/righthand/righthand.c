@@ -6,7 +6,7 @@ void comp_BinaryOperation(void* void_self, String* line, Compiler* compiler) {
     strf(line, "(");
     compile(self->left, line, compiler);
     strf(line, " %.*s ", (int) self->operator.size, self->operator.data);
-    compile(self->left, line, compiler);
+    compile(self->right, line, compiler);
     strf(line, ")");
 }
 

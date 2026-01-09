@@ -95,7 +95,7 @@ Node* keyword_struct(const Token token, Parser* parser) {
 
     put(&info.declaration_scope->variables, info.identifier.base, (void*) declaration);
     assign_generics_to_declaration((void*) declaration, info.generics_collection);
-    info.identifier.parent_declaration = (void*) declaration;
+    declaration->identifier.parent_declaration = (void*) declaration;
     type->parent = declaration;
 
     push(&parser->stack, type->static_body);
@@ -120,6 +120,7 @@ Node* keyword_struct(const Token token, Parser* parser) {
         unbox((void*) field_decl);
         unbox((void*) next_declaration->type);
         unbox(next_declaration);
+        pop(&type->static_body->hoisted_declarations);
     }
 
     NodeVector declarations = { 0 };
