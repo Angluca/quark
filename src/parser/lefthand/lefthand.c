@@ -64,6 +64,7 @@ Node* lefthand_expression(Parser* parser) {
         }
 
         case '(': {
+            // TODO: wrap in surround and remove parenthesis in compiler to remove redundant parenthesis
             Node* expr = expression(parser);
             expect(parser->tokenizer, ')');
             return expr;

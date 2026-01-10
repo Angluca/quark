@@ -39,7 +39,7 @@ Node* parse_array_literal(const Trace trace_start, Parser* parser) {
     }
 
     Node* slice = eval("array", "Slice {}", parser);
-    slice->StructLiteral.type->Wrapper.action.generics.data[0]->Wrapper.Auto.ref = (void*) array_type;
+    slice->StructLiteral.type->Wrapper.action.generics.data[0] = array_type;
     slice->StructLiteral.field_names = empty_field_names;
 
     Node* data_literal = new_node((Node) {

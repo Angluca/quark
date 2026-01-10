@@ -10,7 +10,7 @@
 Type* wrap_applied_generics(Type* type, const TypeVector generics, Declaration* declaration) {
     return new_type((Type) {
         .Wrapper = {
-            .id = NodeWrapper,
+            .id = WrapperAuto,
             .trace = type->trace,
             .flags = type->flags,
             .action = { ActionApplyCollection, generics, (void*) declaration },
@@ -30,7 +30,7 @@ void apply_type_arguments(Wrapper* variable, Parser* parser) {
     for(size_t i = 0; i < base_generics.size; i++) {
         Type* const type_argument = new_type((Type) {
             .Wrapper = {
-                .id = NodeWrapper,
+                .id = WrapperAuto,
                 .trace = variable->trace,
                 .flags = base_generics.data[i]->flags,
                 .Auto = { .parent_base_generic = base_generics.data[i] },
@@ -90,7 +90,7 @@ GenericsCollection collect_generics(Parser* const parser) {
 
         Wrapper* base_generic = (void*) new_type((Type) {
             .Wrapper = {
-                .id = NodeWrapper,
+                .id = WrapperAuto,
                 .flags = fConstExpr,
                 .trace = identifier.trace,
                 .Auto.replacement_generic = (void*) new_type((Type) {
@@ -124,7 +124,7 @@ GenericsCollection collect_generics(Parser* const parser) {
     return collection;
 }
 
-void assign_generics_to_declaration(Declaration* declaration, GenericsCollection collection) {
+void assign_generics_to_declaration(Declaration* declaration, const GenericsCollection collection) {
     if(!collection.base_type_arguments.size) return;
     declaration->generics.base_type_arguments = collection.base_type_arguments;
     push(&declaration->generics.type_arguments_stack, collection.base_type_arguments);
@@ -135,6 +135,6 @@ void assign_generics_to_declaration(Declaration* declaration, GenericsCollection
 }
 
 void close_generics_declaration(Declaration* declaration) {
-    declaration->generics.base_type_arguments.size = 0;
+    declaration->generics.type_arguments_stack.size = 0;
     // TODO: possible fix? remove anchors
 }

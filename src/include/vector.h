@@ -9,8 +9,7 @@
 #define resv(vec, n) do { \
     if((vec)->size + n > (vec)->cap) { \
         if((vec)->cap == 0) (vec)->cap = 1; \
-        do (vec)->cap *= 2; \
-        while((vec)->cap < (vec)->size + n); \
+        while((vec)->cap < (vec)->size + n) (vec)->cap *= 2; \
         (vec)->data = realloc((vec)->data, (vec)->cap * sizeof(*(vec)->data)); \
         assert((vec)->data && "Out of Memory"); \
     } \

@@ -1,5 +1,5 @@
-#include "../../src/tokenizer/trace.h"
-#include "../unit-tests.c"
+#include <tokenizer/tokenizer.h>
+#include "../unit-tests.h"
 
 int test_tokenizer() {
     MessageVector messages = { 0 };
@@ -19,6 +19,41 @@ int test_tokenizer() {
             assert_eq(token.type, types[i]);
             assert_eq(streq(token.trace.source, (String) { strlen(strings[i]), 0, strings[i] }), true);
         }
+
+        assert_eq(tokenizer.current.type, 0);
+        assert_eq(messages.size, 0);
+    }
+
+    test("skips comments") {
+        Tokenizer tokenizer = new_tokenizer("TEST TOKENIZER",
+                                            (char[]) { "// Hello World\n 67 /* <- funny number */ 87" }, &messages);
+
+        const Token first = next(&tokenizer);
+        assert_eq(first.type, TokenNumber);
+        assert_eq(streq(first.trace.source, String("67")), true);
+
+        const Token second = next(&tokenizer);
+        assert_eq(second.type, TokenNumber);
+        assert_eq(streq(second.trace.source, String("87")), true);
+
+        assert_eq(tokenizer.current.type, 0);
+        assert_eq(messages.size, 0);
+    }
+
+    test("complex tokens") {
+        Tokenizer tokenizer = new_tokenizer("TEST TOKENIZER", "\"string\" :: +=", &messages);
+
+        static char types[] = { TokenString, TokenDoubleColon, TokenPlusEqual };
+        static char* strings[] = { "\"string\"", "::", "+=" };
+
+        for(int i = 0; i < sizeof(types) / sizeof(*types); i++) {
+            const Token token = next(&tokenizer);
+            assert_eq(token.type, types[i]);
+            assert_eq(streq(token.trace.source, (String) { strlen(strings[i]), 0, strings[i] }), true);
+        }
+
+        assert_eq(tokenizer.current.type, 0);
+        assert_eq(messages.size, 0);
     }
 
     return print_result();

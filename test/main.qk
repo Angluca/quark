@@ -1,6 +1,0 @@
-struct str {
-    extern int char* data;
-    extern int size_t size;
-}
-
-const auto x = "Hello World";

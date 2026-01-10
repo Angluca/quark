@@ -93,6 +93,7 @@ int main(int argc, char** argv) {
     }
 
     global_in_compiler_step = true;
+    global_compiler_context = &compiler;
     String temp_line = { 0 };
     compile(entry, &temp_line, &compiler);
 
