@@ -31,7 +31,9 @@ void test_complete_test(const char* file, const char* name) {
 }
 
 int test_print_result(const char* file) {
-    printf("\n%s %u / %u test(s) passed\n\n", file, global_passed_tests, global_total_tests);
+    printf("\n\33[3%d;1m%s %u / %u test(s) passed\33[0m\n\n",
+        (global_passed_tests == global_total_tests) + 1,
+        file, global_passed_tests, global_total_tests);
     const int result = global_passed_tests != global_total_tests;
     global_passed_tests = global_total_tests = 0;
     return result;

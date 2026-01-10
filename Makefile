@@ -14,9 +14,9 @@ build: $(SRCS)
 build-debug: $(SRCS)
 	$(CC) $(CFLAGS) $(BSRCS) -o $(OUT) -g -ggdb -DEBUG
 
-all: build testing
+all: build test
 
-testing: $(UT_SRCS)
+test: $(UT_SRCS)
 	$(CC) $(CFLAGS) $(UT_SRCS) -o unit-tests/unit-tests -g
 
 clean:

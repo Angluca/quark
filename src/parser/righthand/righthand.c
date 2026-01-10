@@ -46,7 +46,7 @@ Node* expression(Parser* parser) {
     return righthand_expression(lefthand_expression(parser), parser, 15);
 }
 
-Node* righthand_expression(Node* lefthand, Parser* parser, unsigned char precedence) {
+Node* righthand_expression(Node* lefthand, Parser* parser, const unsigned char precedence) {
     RighthandOperator operator;
     while((operator = global_righthand_operator_table[parser->tokenizer->current.type]).precedence) {
         if(operator.precedence >= precedence + (operator.type == RightAssignment)) break;

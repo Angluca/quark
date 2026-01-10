@@ -89,11 +89,15 @@ static int clash_acceptor(Type* type, Type* follower, void* void_accumulator) {
         return assign_wrapper((void*) follower, type, accumulator);
     }
 
-    if(type->id != follower->id) {
-    } else if(type->id == NodeExternal && streq(type->External.data, follower->External.data)) {
-        return 1;
-    } else {
-        return 0;
+    if(type->id == follower->id) switch(type->id) {
+        case NodeExternal:
+            if(streq(type->External.data, follower->External.data)) {
+                return 1;
+            }
+            break;
+
+        default:
+            return 0;
     }
 
     if(type->flags & follower->flags & fNumeric) return 1;
