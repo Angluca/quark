@@ -1,7 +1,7 @@
 #include <stdlib.h>
+#include <parser/keywords.h>
+#include <parser/nodes/nodes.h>
 #include "unit-tests.h"
-#include "parser/keywords.h"
-#include "parser/nodes/nodes.h"
 
 unsigned global_total_tests = 0,
          global_passed_tests = 0,
@@ -43,6 +43,8 @@ int test_literal();
 
 int test_lefthand();
 
+int test_righthand();
+
 int main() {
     init_node_arena(2048);
     populate_keyword_table();
@@ -57,7 +59,9 @@ int main() {
         const int tally
                 = test_tokenizer()
                   + test_literal()
-                  + test_lefthand();
+                  + test_lefthand()
+                  + test_righthand();
+
         assert_eq(tally, 0);
     }
 

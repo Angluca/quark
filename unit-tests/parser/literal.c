@@ -1,8 +1,8 @@
 #include <parser/parser.h>
 #include <parser/lefthand/lefthand.h>
 #include <parser/statement/statement.h>
-#include "../unit-tests.h"
 #include "parser/statement/scope.h"
+#include "../unit-tests.h"
 
 int test_literal() {
     MessageVector messages = { 0 };
@@ -103,6 +103,15 @@ int test_literal() {
         assert_eq(node->field_values.data[1]->StructLiteral.field_values.size, 3);
         assert_eq(node->type->id, WrapperVariable);
         assert_eq((bool) (node->type->Wrapper.action.generics.data[0]->flags & fNumeric), true);
+    }
+
+    test("typeof()") {
+        Tokenizer tokenizer = new_tokenizer("TEST LITERAL", "typeof(5)", &messages);
+        Parser parser = { &tokenizer };
+
+        Wrapper* type = (void*) lefthand_expression(&parser);
+        assert_eq(type->id, WrapperAuto);
+        assert_eq((bool) (type->flags & fNumeric), true);
     }
 
     return print_result();
