@@ -32,7 +32,7 @@ struct Option<T> {
 		return self.value;
 	}
 
-	T unwrap_or_default(self, T default) {
+    T unwrap_or(self, T default) {
 		if(self.some) return self.value;
 		return default;
 	}
