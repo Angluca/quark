@@ -41,15 +41,17 @@ FunctionDeclaration* entry_declaration() {
 }
 
 char* library_path = ".";
-char* helps =
-    " -l: library path    '-l /path/to/dir'\n"
-    " -o: output c        '-o hello.c'\n"
-    " hint: ./qc main.qk -o main.c -l ../dir \n"
-    "";
+
+const char* help_message =
+	" \33[1musage:\33[0m %s [input_files,] [flags,]\n"
+	"        %s main.qk -o main.c\n"
+	" \33[1mflags:\33[0m\n"
+	"   -h    <no arguments>     prints help/usage menu\n"
+	"   -o    /path/to/output.c  specifies compiled output path\n"
+	"   -l    /path/to/library/  specifies the parent directory of `lib::std`\n";
 
 int main(int argc, char** argv) {
     char* name = clname(argc, argv);
-    (void)name; // TODO: maybe introduce UNUSED macro
 
     Str_Vector input_files = {0};
     char* output_file = "out.c";
@@ -58,7 +60,8 @@ int main(int argc, char** argv) {
     while ((flag = clflag()))
         switch (flag)
         {
-        case 'h': printf("%s\n", helps);
+        case 'h':
+			printf(help_message, name, name);
             return 0;
         case -1: push(&input_files, clarg());
             break;
@@ -66,11 +69,11 @@ int main(int argc, char** argv) {
             break;
         case 'l': library_path = clarg();
             break;
-        default: panicf("unknown flag '-%c'\n", flag);
+		default: panicf("unknown flag '-%c'\n hint: %s -h\n", flag, name);
         }
 
     if (input_files.size == 0) {
-        printf("%s\n", helps); return 0;
+		panicf("missing input files\n hint: %s -h\n", name);
     }
 
     char* input_content = fs_readfile(input_files.data[0]);
