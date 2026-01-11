@@ -14,8 +14,8 @@
 To build the Compiler:
 
 ```sh
-make
-make test
+make # or specify executable name
+make QC=my_executable
 
 ./qc -h
 ```
