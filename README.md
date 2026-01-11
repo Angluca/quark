@@ -24,8 +24,10 @@ make test
 
 ```sh
 export QUARK_ROOT=/path/to/quark
-$ ./qc -h
-$ ./qc <path> -o <out-path> -l $QUARK_ROOT
+export PATH=$PATH:$QUARK_ROOT
+
+qc -h
+qc /path/to/input.qk -o /path/to/output.c -l $QUARK_ROOT
 ```
 
 ## Learn More
