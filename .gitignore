@@ -1,4 +1,15 @@
+# Vim
 *.swp
-qc
+
+# MacOS
 .DS_Store
-qc.dSYM
+
+# CLion builds
+*.dSYM/
+
+# Local testing
+qc
+testing/
+
+# Unit tests
+unit-tests/unit-tests
