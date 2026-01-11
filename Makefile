@@ -67,7 +67,7 @@ endif
 # Build everything
 all: build test-c 
 
-# test .qk using current ./qc, continue on errors
+# test .qk using current ./qc
 test:
 	@echo "------ qk tests ------"
 	@mkdir -p $(TEST_BUILD)
@@ -87,7 +87,12 @@ test:
 test-c:
 	@echo "------ unit-tests ------"
 	@mkdir -p $(UT_BUILD)
-	$(CC) $(CFLAGS) -g $(LDFLAGS) $(UT_SRCS) -o $(UT_BUILD)/unit-tests$(EXE)
+	@if [ ! -f "$(UT_BUILD)/unit-tests$(EXE)" ]; then \
+		echo "Compiling unit-tests"; \
+		$(CC) $(CFLAGS) -g $(LDFLAGS) $(UT_SRCS) -o $(UT_BUILD)/unit-tests$(EXE); \
+	fi
+	@echo "Running unit tests..."
+	@$(UT_BUILD)/unit-tests$(EXE)
 
 # only release build qc, tests all debug build
 release:
