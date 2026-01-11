@@ -1,12 +1,12 @@
 #-- Makefile Usage: default release build --------
-# > make      		   # make release
-# > make build         # release build qc
-# > make build MODE=debug # debug build qc
-# > make test          # qk tests 
-# > make test-c        # unit-tests
-# > make release       # release build qc + tests-c
-# > make debug         # debug build qc + tests-c
-# > make clean         # remove build/files
+# > make      		       # make release
+# > make build             # release build qc
+# > make build MODE=debug  # debug build qc
+# > make test              # qk tests
+# > make test-c            # unit-tests
+# > make release           # release build qc + tests-c
+# > make debug             # debug build qc + tests-c
+# > make clean             # remove build/files
 #-------------------------------------------------
 
 EXE :=
@@ -47,7 +47,7 @@ OUT := ./$(QC)
 MODE ?= release
 
 .PHONY: all build debug release test test-c clean
-# make defualt is make all
+# make default is make all
 .DEFAULT_GOAL := all
 
 # Ensure build directories exist
