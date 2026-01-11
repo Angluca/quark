@@ -70,6 +70,9 @@ all: build test-c
 # test .qk using current ./qc
 test:
 	@echo "------ qk tests ------"
+	@if [ ! -f "$(OUT)" ]; then \
+		$(MAKE) "build"; \
+	fi
 	@mkdir -p $(TEST_BUILD)
 	@for file in $(TEST_QK); do \
 		base=$${file%.qk}; \
