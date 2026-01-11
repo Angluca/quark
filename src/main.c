@@ -28,9 +28,16 @@ FunctionDeclaration* entry_declaration() {
     return declaration;
 }
 
+const char* help_message =
+        " \33[1musage:\33[0m %s [input_files,] [flags,]\n"
+        "        %s main.qk -o main.c\n"
+        " \33[1mflags:\33[0m\n"
+        "   -h    <no arguments>     prints help/usage menu\n"
+        "   -o    /path/to/output.c  specifies compiled output path\n"
+        "   -l    /path/to/library/  specifies the parent directory of `lib::std`\n";
+
 int main(int argc, char** argv) {
-    char* const name = clname(argc, argv);
-    (void) name;
+    char* name = clname(argc, argv);
 
     CStringVector input_files = { 0 };
     char* output_file = "out.c";
@@ -38,23 +45,20 @@ int main(int argc, char** argv) {
     int flag;
     while((flag = clflag()))
         switch(flag) {
-            case -1:
-                push(&input_files, clarg());
+            case 'h':
+                printf(help_message, name, name);
+                return 0;
+            case -1: push(&input_files, clarg());
                 break;
-
-            case 'o':
-                output_file = clarg();
+            case 'o': output_file = clarg();
                 break;
-
-            case 'l':
-                global_library_path = clarg();
+            case 'l': global_library_path = clarg();
                 break;
-
-            default: panicf("unknown flag '-%c'\n", flag);
+            default: panicf("unknown flag '-%c'\n hint: %s -h\n", flag, name);
         }
 
     if(input_files.size == 0) {
-        panicf("no input files provided\n");
+        panicf("missing input files\n hint: %s -h\n", name);
     }
 
     char* input_content = fs_readfile(input_files.data[0]);
