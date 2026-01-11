@@ -23,8 +23,8 @@ make build OUT=/path/to/executable
 ## Compiling a Source File to C:
 
 ```sh
-$ ./qc -h
-$ ./qc /path/to/input.qk -o /path/to/output.c
+./qc -h
+./qc /path/to/input.qk -o /path/to/output.c
 ```
 
 ## Learn More
