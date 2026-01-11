@@ -14,8 +14,8 @@
 To build the Compiler:
 
 ```sh
-make build # or specify output with `OUT` (defaults to `qc`)
-make build OUT=/path/to/executable
+make
+make test
 
 ./qc -h
 ```
@@ -23,8 +23,9 @@ make build OUT=/path/to/executable
 ## Compiling a Source File to C:
 
 ```sh
+export QUARK_ROOT=/path/to/quark
 $ ./qc -h
-$ ./qc <path> -o <out-path>
+$ ./qc <path> -o <out-path> -l $QUARK_ROOT
 ```
 
 ## Learn More
