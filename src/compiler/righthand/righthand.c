@@ -3,11 +3,15 @@
 void comp_BinaryOperation(void* void_self, String* line, Compiler* compiler) {
     BinaryOperation* const self = void_self;
 
-    strf(line, "(");
     compile(self->left, line, compiler);
-    strf(line, " %.*s ", (int) self->operator.size, self->operator.data);
+
+    strf(line,
+         self->operator.data[0] == '.' || (self->operator.data[0] == '-' && self->operator.data[1] == '>')
+             ? "%.*s"
+             : " %.*s ",
+         (int) self->operator.size, self->operator.data);
+
     compile(self->right, line, compiler);
-    strf(line, ")");
 }
 
 void comp_FunctionCall(void* void_self, String* line, Compiler* compiler) {
@@ -21,4 +25,3 @@ void comp_FunctionCall(void* void_self, String* line, Compiler* compiler) {
     }
     strf(line, ")");
 }
-

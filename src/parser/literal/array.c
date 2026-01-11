@@ -48,7 +48,7 @@ Node* parse_array_literal(const Trace trace_start, Parser* parser) {
             .type = new_type((Type) {
                 .Wrapper = {
                     .id = WrapperSurround,
-                    .Surround = { (void*) array_type, {}, String("[]"), true },
+                    .Surround = { (void*) array_type, {}, String("[]") },
                 },
             }),
             .field_names = field_names,

@@ -51,7 +51,6 @@ typedef struct Wrapper {
             Node* child;
             String prefix;
             String postfix;
-            bool no_parenthesis_wrap : 1;
         } Surround;
     };
 } Wrapper;

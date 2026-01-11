@@ -24,7 +24,7 @@ Node* reference(Node* node, Trace trace) {
             .id = WrapperSurround,
             .trace = trace,
             .type = (void*) reference((void*) node->type, trace),
-            .Surround = { node, String("&") },
+            .Surround = { node, String("(&"), String(")") },
         }
     });
 }
@@ -50,7 +50,7 @@ Node* dereference(Node* node, Trace trace, MessageVector* messages) {
             .flags = fMutable,
             .trace = trace,
             .type = (void*) dereference((void*) node->type, trace, messages),
-            .Surround = { node, String("*") },
+            .Surround = { node, String("(*"), String(")") },
         }
     });
 }

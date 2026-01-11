@@ -40,9 +40,9 @@ void comp_Surround(void* void_self, String* line, Compiler* compiler) {
     Wrapper* const self = void_self;
     const bool applied_action = apply_action(self->action, 0);
 
-    strf(line, self->Surround.no_parenthesis_wrap ? "%.*s" : "(%.*s", PRINT(self->Surround.prefix));
+    strf(line, "%.*s", PRINT(self->Surround.prefix));
     compile(self->Surround.child, line, compiler);
-    strf(line, self->Surround.no_parenthesis_wrap ? "%.*s" : "%.*s)", PRINT(self->Surround.postfix));
+    strf(line, "%.*s", PRINT(self->Surround.postfix));
 
     if(applied_action) remove_action(self->action, 0);
 }

@@ -24,12 +24,21 @@ Node* parse_binary_operation(Node* lefthand, const RighthandOperator operator, P
     clash_types(lefthand->type, righthand->type, stretch(lefthand->trace, righthand->trace),
                 parser->tokenizer->messages, 0);
 
+    static Type boolean_type = {
+        .External = {
+            .id = NodeExternal,
+            .type = &boolean_type,
+            .flags = fType | fNumeric,
+            .data = String("bool"),
+        },
+    };
+
     return new_node((Node) {
         .BinaryOperation = {
             .id = NodeBinaryOperation,
             .flags = lefthand->flags & righthand->flags,
             .trace = stretch(lefthand->trace, righthand->trace),
-            .type = lefthand->type,
+            .type = operator.type == RightCompare ? &boolean_type : lefthand->type,
             .left = lefthand,
             .operator = operator_token.trace.source,
             .right = righthand,

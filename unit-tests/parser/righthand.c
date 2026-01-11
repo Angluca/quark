@@ -1,6 +1,7 @@
 #include <parser/righthand/righthand.h>
 #include <parser/statement/scope.h>
 #include <parser/statement/statement.h>
+#include <parser/type/types.h>
 #include "../unit-tests.h"
 
 int test_righthand() {
@@ -45,7 +46,7 @@ int test_righthand() {
         Tokenizer tokenizer = new_tokenizer("TEST RIGHTHAND", "extern a a; extern b b + a", &messages);
         parser.tokenizer = &tokenizer;
 
-        unbox((void*) statement(&parser));
+        unbox(statement(&parser));
 
         BinaryOperation* bin = (void*) expression(&parser);
         assert_eq(bin->id, NodeBinaryOperation);
@@ -82,9 +83,68 @@ int test_righthand() {
         assert_eq(tokenizer.current.type, 0);
     }
 
-    // test("function calls & external functions") {
-    //     Tokenizer tokenizer = new_tokenizer("TEST RIGHTHAND", )
-    // }
+    test("function calls & external functions") {
+        Tokenizer tokenizer = new_tokenizer(
+            "TEST RIGHTHAND", "extern b extern test(extern a a); auto z = test(5)", &messages);
+        parser.tokenizer = &tokenizer;
+
+        unbox(statement(&parser));
+
+        BinaryOperation* bin = (void*) expression(&parser);
+        assert_eq(bin->id, NodeBinaryOperation);
+
+        assert_eq(bin->left->id, WrapperVariable);
+        assert_eq(bin->left->type->id, WrapperAuto);
+        assert_eq(bin->left->type->Wrapper.Auto.ref->id, NodeExternal);
+        assert_eq(streq(bin->left->type->Wrapper.Auto.ref->External.data, String("b")), true);
+
+        assert_eq(bin->right->id, NodeFunctionCall);
+        assert_eq(messages.size, 1);
+        pop(&messages);
+
+        assert_eq(tokenizer.current.type, 0);
+    }
+
+    test("field access and pointer to field access") {
+        Tokenizer tokenizer = new_tokenizer("TEST RIGHTHAND",
+                                            "struct Fields { extern a a; }"
+                                            "Fields fields;"
+                                            "auto fields_a = fields.a;"
+                                            "auto fields_ref_a = (&fields)->a;",
+                                            &messages);
+        parser.tokenizer = &tokenizer;
+        collect_until(&parser, &statement, 0, 0);
+        assert_eq(messages.size, 0);
+
+        Wrapper* fields_a = find_in_scope(*parser.stack.data[0], (Trace) { String("fields_a") });
+        assert_eq((bool) fields_a, true);
+        External* fields_a_type = (void*) open_type(fields_a->type, 0).type;
+        assert_eq(fields_a_type->id, NodeExternal);
+        assert_eq(streq(fields_a_type->data, String("a")), true);
+
+        Wrapper* fields_ref_a = find_in_scope(*parser.stack.data[0], (Trace) { String("fields_ref_a") });
+        assert_eq((bool) fields_ref_a, true);
+        External* fields_ref_a_type = (void*) open_type(fields_ref_a->type, 0).type;
+        assert_eq(fields_ref_a_type->id, NodeExternal);
+        assert_eq(streq(fields_ref_a_type->data, String("a")), true);
+    }
+
+    test("comparison operator precedence and resulting type") {
+        Tokenizer tokenizer = new_tokenizer("TEST RIGHTHAND", "1 > 2 == 3", &messages);
+        parser.tokenizer = &tokenizer;
+
+        BinaryOperation* expr = (void*) expression(&parser);
+        assert_eq(expr->id, NodeBinaryOperation);
+        assert_eq(streq(expr->operator, String("==")), true);
+        assert_eq(expr->type->id, NodeExternal);
+        assert_eq(streq(expr->type->External.data, String("bool")), true);
+
+        assert_eq(expr->left->id, NodeBinaryOperation);
+        assert_eq(streq(expr->left->BinaryOperation.operator, String(">")), true);
+
+        assert_eq(messages.size, 0);
+        assert_eq(tokenizer.current.type, 0);
+    }
 
     return print_result();
 }

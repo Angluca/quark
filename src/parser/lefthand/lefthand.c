@@ -67,7 +67,15 @@ Node* lefthand_expression(Parser* parser) {
             // TODO: wrap in surround and remove parenthesis in compiler to remove redundant parenthesis
             Node* expr = expression(parser);
             expect(parser->tokenizer, ')');
-            return expr;
+            return new_node((Node) {
+                .Wrapper = {
+                    .id = WrapperSurround,
+                    .trace = expr->trace,
+                    .type = expr->type,
+                    .flags = expr->flags,
+                    .Surround = { expr, String("("), String(")") },
+                },
+            });
         }
 
         case TokenString: return string_literal(token, parser);

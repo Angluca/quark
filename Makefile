@@ -11,7 +11,7 @@ OUT = qc
 build: $(SRCS)
 	$(CC) $(CFLAGS) $(BSRCS) -o $(OUT)
 
-build-debug: $(SRCS)
+debug: $(SRCS)
 	$(CC) $(CFLAGS) $(BSRCS) -o $(OUT) -g -ggdb -DEBUG
 
 all: build test
