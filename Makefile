@@ -1,11 +1,11 @@
 #-- Makefile Usage: default release build --------
 # > make      		   # make release
-# > make build
-# > make build MODE=debug
+# > make build         # release build qc
+# > make build MODE=debug # debug build qc
 # > make test          # qk tests 
 # > make test-c        # unit-tests
-# > make release       # release build + tests-c
-# > make debug         # debug build + tests-c
+# > make release       # release build qc + tests-c
+# > make debug         # debug build qc + tests-c
 # > make clean         # remove build/files
 #-------------------------------------------------
 
