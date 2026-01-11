@@ -24,7 +24,7 @@ make build OUT=/path/to/executable
 
 ```sh
 $ ./qc -h
-$ ./qc <path> -o <out-path>
+$ ./qc /path/to/input.qk -o /path/to/output.c
 ```
 
 ## Learn More
