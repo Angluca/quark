@@ -13,7 +13,7 @@ Type* wrap_applied_generics(Type* type, const TypeVector generics, Declaration* 
             .id = WrapperAuto,
             .trace = type->trace,
             .flags = type->flags,
-            .action = { ActionApplyCollection, generics, (void*) declaration },
+            .action = { ActionApplyGenerics, generics, (void*) declaration },
             .Auto = { type },
         }
     });

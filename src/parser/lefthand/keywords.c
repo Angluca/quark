@@ -46,6 +46,15 @@ Node* keyword_sizeof(const Token token, Parser* parser) {
     NodeVector arguments = { 0 };
     push(&arguments, expression(parser));
 
+    static Type usize_type = {
+        .External = {
+            .id = NodeExternal,
+            .flags = fNumeric | fType,
+            .type = &usize_type,
+            .data = String("size_t"),
+        },
+    };
+
     return new_node((Node) {
         .FunctionCall = {
             .id = NodeFunctionCall,
@@ -57,7 +66,7 @@ Node* keyword_sizeof(const Token token, Parser* parser) {
                 }
             }),
             .arguments = arguments,
-            .type = (void*) find_on_stack(parser->stack, (Trace) { String("usize") }),
+            .type = &usize_type,
         }
     });
 }
