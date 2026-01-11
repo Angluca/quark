@@ -55,9 +55,11 @@ $(shell mkdir -p $(BUILD_DIR) $(TEST_BUILD) $(UT_BUILD))
 
 # Build main program
 build: $(SRCS)
-ifeq ($(MODE),debug)
+ifeq ($(shell echo $(MODE) | tr '[:upper:]' '[:lower:]'),debug)
+	@echo "------ Debug build qc ------"
 	$(CC) $(CFLAGS) $(SRCS) $(LDFLAGS) -g -ggdb -DDEBUG -o $(BUILD_DIR)/$(QC)
 else
+	@echo "------ Release build qc ------"
 	$(CC) $(CFLAGS) $(SRCS) $(LDFLAGS) -O2 -o $(BUILD_DIR)/$(QC)
 endif
 	@cp $(BUILD_DIR)/$(QC) $(OUT)
