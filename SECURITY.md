@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-Currently this repository does not have any secure versions (see table)
+Currently, this repository does not have any secure versions (see table)
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -10,4 +10,5 @@ Currently this repository does not have any secure versions (see table)
 
 ## Reporting a Vulnerability
 
-Reporting a vulnerability works like finding an issue. You can create an [issue](https://github.com/quark-programming/quark/issues), or submit a [pull request](https://github.com/quark-programming/quark/pulls) to fix an vulnerability you find.
+Reporting a vulnerability works like finding an issue. You can create an [issue](https://github.com/quark-programming/quark/issues), or submit a [pull request](https://github.com/quark-programming/quark/pulls)
+to fix a vulnerability you find.

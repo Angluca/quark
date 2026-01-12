@@ -81,7 +81,6 @@ Node* parse_optional_coalescing(Node* lefthand, Parser* parser) {
             .body = new_scope(NULL),
         },
     });
-    push(&operation_step_collection->children, some_branch_if_statement);
 
     Node* const if_cond = new_node((Node) {
         .BinaryOperation = {
@@ -99,6 +98,7 @@ Node* parse_optional_coalescing(Node* lefthand, Parser* parser) {
     close_type(opened_optional_value.actions, 0);
 
     if(no_resulting_value) {
+        push(&operation_step_collection->children, some_branch_if_statement);
         push(&some_branch_if_statement->ControlStatement.body->children, lefthand_optional_value);
         return (void*) operation_step_collection;
     }
@@ -119,6 +119,7 @@ Node* parse_optional_coalescing(Node* lefthand, Parser* parser) {
 
     Node* const operation_temp_result = create_temp_variable(operation_result_value, parser,
                                                              &operation_step_collection->children);
+    push(&operation_step_collection->children, some_branch_if_statement);
 
     Node* const some_branch_result_optional = new_node((Node) {
         .StructLiteral = {
