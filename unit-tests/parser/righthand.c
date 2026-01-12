@@ -164,5 +164,41 @@ int test_righthand() {
         assert_eq(tokenizer.current.type, 0);
     }
 
+    test("optionals & optional coalescing") {
+        Tokenizer tokenizer = new_tokenizer("TEST RIGHTHAND",
+                                            "struct Option<T> { extern bool some; T value; }"
+                                            "extern TEST? basic_option;"
+                                            "Fields? object_option;"
+                                            "auto coalesced_option = object_option?.a;",
+                                            &messages);
+        parser.tokenizer = &tokenizer;
+        collect_until(&parser, &statement, 0, 0);
+        assert_eq(messages.size, 0);
+
+        Declaration* const Option = find_on_stack_unwrapped(parser.stack, String("Option"));
+        assert_eq(Option != NULL, true);
+        assert_eq(streq(Option->identifier.base, String("Option")), true);
+
+        Declaration* const basic_option = find_on_stack_unwrapped(parser.stack, String("basic_option"));
+        assert_eq(basic_option != NULL, true);
+        assert_eq(basic_option->id, NodeVariableDeclaration);
+
+        OpenedType open_basic_option = open_type(basic_option->type, 0);
+        Type* basic_option_base = find_last_generic_action(open_basic_option.actions, Option).data[0];
+        close_type(open_basic_option.actions, 0);
+        assert_eq(basic_option_base->id, NodeExternal);
+        assert_eq(streq(basic_option_base->External.data, String("TEST")), true);
+
+        Declaration* const coalesced_option = find_on_stack_unwrapped(parser.stack, String("coalesced_option"));
+        assert_eq(coalesced_option != NULL, true);
+        assert_eq(coalesced_option->id, NodeVariableDeclaration);
+
+        OpenedType open_coalesced_option = open_type(coalesced_option->type, 0);
+        Type* coalesced_option_base = find_last_generic_action(open_coalesced_option.actions, Option).data[0];
+        close_type(open_coalesced_option.actions, 0);
+        assert_eq(coalesced_option_base->id, NodeExternal);
+        assert_eq(streq(coalesced_option_base->External.data, String("a")), true);
+    }
+
     return print_result();
 }
