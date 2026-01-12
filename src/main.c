@@ -23,6 +23,7 @@ FunctionDeclaration* entry_declaration() {
             .body = new_scope(NULL),
         }
     });
+    declaration->identifier.parent_declaration = (void*) declaration;
     function_type->declaration = declaration;
 
     return declaration;

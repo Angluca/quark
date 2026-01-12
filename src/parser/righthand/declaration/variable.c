@@ -15,7 +15,7 @@ Node* parse_variable_declaration(Type* type, IdentifierInfo info, Parser* parser
             .identifier = info.identifier,
         }
     });
-    info.identifier.parent_declaration = (void*) declaration;
+    declaration->identifier.parent_declaration = (void*) declaration;
 
     push(&info.declaration_scope->hoisted_declarations, (void*) declaration);
     put(&info.declaration_scope->variables, info.identifier.base, (void*) declaration);

@@ -7,6 +7,7 @@
 #include "../../statement/statement.h"
 #include "../righthand.h"
 #include "../../literal/wrapper.h"
+#include "parser/lefthand/lefthand.h"
 
 static int recycle_missing_generics(Type* missing, Type* ignore, void* void_parser) {
     (void) ignore;
@@ -26,7 +27,7 @@ static int recycle_missing_generics(Type* missing, Type* ignore, void* void_pars
 }
 
 Node* parse_function_declaration(Type* return_type, IdentifierInfo info, Parser* parser) {
-    Trace trace_start = stretch(return_type->trace, info.trace);
+    const Trace trace_start = stretch(return_type->trace, info.trace);
 
     FunctionType* function_type = (void*) new_type((Type) {
         .FunctionType = {
@@ -58,30 +59,55 @@ Node* parse_function_declaration(Type* return_type, IdentifierInfo info, Parser*
     push(&info.declaration_scope->hoisted_declarations, (void*) declaration);
     put(&info.declaration_scope->variables, info.identifier.base, (void*) declaration);
 
-    const NodeVector argument_declarations = collect_until(parser, &expression, ',', ')');
+    while(parser->tokenizer->current.type && parser->tokenizer->current.type != ')') {
+        Argument argument = { 0 };
 
-    for(size_t i = 0; i < argument_declarations.size; i++) {
-        Node* const argument = argument_declarations.data[i];
+        // TODO: remove self keyword
+        if(parser->tokenizer->current.type == TokenIdentifier
+           && streq(parser->tokenizer->current.trace.source, String("self"))) {
+            StructType* const parent_structure = (void*) declaration->identifier.parent_scope;
 
-        if(argument->id == WrapperVariable && argument->flags & fIgnoreStatement) {
-            push(&function_type->signature, argument->type);
+            if(parent_structure->id == NodeStructType) {
+                const Trace trace = next(parser->tokenizer).trace;
+                argument.identifier = trace.source;
 
-            const Argument argument_value = {
-                .type = argument->type,
-                .identifier = argument->Wrapper.Variable.declaration->identifier.base,
-            };
-
-            push(&declaration->arguments, argument_value);
-
-            unbox(argument);
-            continue;
+                Wrapper* wrapper = variable_of((void*) parent_structure->parent, trace, 0);
+                apply_type_arguments(wrapper, parser);
+                argument.type = wrapper->type;
+                unbox((void*) wrapper);
+            }
         }
 
-        push(parser->tokenizer->messages,
-             REPORT_ERR(argument_declarations.data[i]->trace, String("expected an argument declaration")));
-        unbox(argument);
+        if(!argument.type) {
+            argument.type = (void*) righthand_expression(lefthand_expression(parser), parser, RightDeclaration);
+            argument.identifier = expect(parser->tokenizer, TokenIdentifier).trace.source;
+        }
+
+        if(!(argument.type->flags & fType)) {
+            push(parser->tokenizer->messages,
+                 REPORT_ERR(argument.type->trace, strf(0, "'\33[35m%.*s\33[0m' is not a type",
+                     PRINT(argument.type->trace.source))));
+        }
+
+        Declaration* const argument_declaration = (void*) new_node((Node) {
+            .VariableDeclaration = {
+                .id = NodeVariableDeclaration,
+                .type = argument.type,
+                .identifier = {
+                    .base = argument.identifier,
+                    .parent_scope = (void*) parser->stack.data[0],
+                },
+            }
+        });
+        argument_declaration->identifier.parent_declaration = argument_declaration;
+        put(&declaration->body->variables, argument.identifier, argument_declaration);
+
+        push(&declaration->arguments, argument);
+        push(&function_type->signature, argument.type);
+
+        if(!try(parser->tokenizer, ',', NULL)) break;
     }
-    free(argument_declarations.data);
+    expect(parser->tokenizer, ')');
 
     if(!declaration->identifier.is_external) {
         expect(parser->tokenizer, '{');
