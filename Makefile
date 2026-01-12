@@ -1,117 +1,143 @@
-#-- Makefile Usage: default release build --------
-# > make      		       # make release
-# > make build             # release build qc
-# > make build MODE=debug  # debug build qc
-# > make test              # qk tests
-# > make test-c            # unit-tests
-# > make release           # release build qc + tests-c
-# > make debug             # debug build qc + tests-c
-# > make clean             # remove build/files
+#-------------------------------------------------
+# Makefile Usage
+# > make                  # release build + unit-tests
+# > make build            # release build qc
+# > make build MODE=debug # debug build qc
+# > make test             # qk tests
+# > make test-c           # unit-tests
+# > make release          # release build qc + unit-tests
+# > make debug            # debug build qc + unit-tests
+# > make clean            # remove build/files
 #-------------------------------------------------
 
+# ========= Tools =========
+CC  := gcc
+QC  := qc
 EXE :=
-CC := gcc
-QC := qc
-CFLAGS := -Isrc/include -Isrc -Wall -Wno-missing-braces -Wno-char-subscripts
+
+# ========= Platform detection =========
+ifeq ($(OS),Windows_NT)
+	PLATFORM := windows
+	EXE := .exe
+	CC  := $(CC)$(EXE)
+	QC  := $(QC)$(EXE)
+
+	MKDIR = if not exist "$(1)" mkdir "$(1)"
+	RM_RF = if exist "$(1)" rmdir /S /Q "$(1)"
+	RM_F  = if exist "$(1)" del /Q "$(1)"
+	COPY  = copy /Y
+else
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S),Darwin)
+		PLATFORM := macos
+	else
+		PLATFORM := linux
+	endif
+
+	MKDIR = mkdir -p "$(1)"
+	RM_RF = rm -rf "$(1)"
+	RM_F  = rm -f "$(1)"
+	COPY  = cp
+endif
+
+# ========= Flags =========
+CFLAGS  := -Isrc/include -Isrc -Wall -Wno-missing-braces -Wno-char-subscripts
 LDFLAGS :=
 
-# Platform detection
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Linux)
-    PLATFORM := linux
-endif
-ifeq ($(UNAME_S),Darwin)
-    PLATFORM := macos
-endif
-ifeq ($(OS),Windows_NT)
-    PLATFORM := windows
-    EXE := .exe
-	CC := $(CC)$(EXE)
-	QC := $(QC)$(EXE)
-endif
-
-# Directories
+# ========= Directories =========
 BUILD_DIR := build
 TEST_BUILD := $(BUILD_DIR)/tests
-UT_BUILD := $(BUILD_DIR)/unit_tests
+UT_BUILD   := $(BUILD_DIR)/unit_tests
 
-# Source files
-SRCS := $(shell find src -name '*.c')
-TEST_QK := $(wildcard tests/*.qk)
-UT_SRCS := unit-tests/main.c \
-   $(wildcard src/*/*.c) $(wildcard src/*/*/*.c) $(wildcard src/*/*/*/*.c) \
-   $(wildcard unit-tests/*/*.c) $(wildcard unit-tests/*/*/*.c)
-
-# Output executable
-OUT := ./$(QC)
+# ========= Mode normalize =========
 MODE ?= release
+MODE_L := $(shell echo $(MODE) | tr A-Z a-z)
 
-.PHONY: all build debug release test test-c clean
-# make default is make all
+# ========= Sources =========
+MAIN_C := src/main.c
+SRCS := \
+	$(wildcard src/*/*.c) \
+	$(wildcard src/*/*/*.c) \
+	$(wildcard src/*/*/*/*.c)
+
+TEST_QK := $(wildcard tests/*.qk)
+
+UT_SRCS := \
+	$(wildcard unit-tests/*.c) \
+	$(wildcard unit-tests/*/*.c) \
+	$(wildcard unit-tests/*/*/*.c) \
+	$(wildcard unit-tests/*/*/*/*.c) \
+
+# ========= Output =========
+OUT := ./${QC}
+
+.PHONY: all build test test-c release debug clean
 .DEFAULT_GOAL := all
 
-# Ensure build directories exist
-$(shell mkdir -p $(BUILD_DIR) $(TEST_BUILD) $(UT_BUILD))
+# ========= Directories =========
+dirs:
+	@$(call MKDIR,$(BUILD_DIR))
+	@$(call MKDIR,$(TEST_BUILD))
+	@$(call MKDIR,$(UT_BUILD))
 
-# Build main program
-build: $(SRCS)
-ifeq ($(shell echo $(MODE) | tr '[:upper:]' '[:lower:]'),debug)
-	@echo "------ Debug build qc ------"
-	$(CC) $(CFLAGS) $(SRCS) $(LDFLAGS) -g -ggdb -DDEBUG -o $(BUILD_DIR)/$(QC)
+# ========= Build qc =========
+build: dirs
+ifeq ($(MODE_L),debug)
+	@echo ------ Debug build qc ------
+	$(CC) $(CFLAGS) $(MAIN_C) $(SRCS) $(LDFLAGS) -g -ggdb -DDEBUG -o $(BUILD_DIR)/$(QC)
 else
-	@echo "------ Release build qc ------"
-	$(CC) $(CFLAGS) $(SRCS) $(LDFLAGS) -O2 -o $(BUILD_DIR)/$(QC)
+	@echo ------ Release build qc ------
+	$(CC) $(CFLAGS) $(MAIN_C) $(SRCS) $(LDFLAGS) -O2 -o $(BUILD_DIR)/$(QC)
 endif
-	@cp $(BUILD_DIR)/$(QC) $(OUT)
+	@$(COPY) $(BUILD_DIR)/$(QC) $(OUT)
 
-# Build everything
-all: build test-c 
+# ========= Default =========
+all: build test-c
 
-# test .qk using current ./qc
+# ========= qk tests =========
 test:
-	@echo "------ qk tests ------"
-	@if [ ! -f "$(OUT)" ]; then \
-		$(MAKE) "build"; \
-	fi
-	@mkdir -p $(TEST_BUILD)
-	@for file in $(TEST_QK); do \
-		base=$${file%.qk}; \
-		outname=$(TEST_BUILD)/$${base##*/}$(EXE); \
-		echo "Compiling $$file -> $$outname.c"; \
-		if $(OUT) "$$file" -o "$(TEST_BUILD)/$${base##*/}.c" -l "$(PWD)"; then \
-			echo "Building $$outname"; \
-			$(CC) $(CFLAGS) -g $(LDFLAGS) "$(TEST_BUILD)/$${base##*/}.c" -o $$outname; \
-		else \
-			echo "!!! ERROR: $$file failed to compile, skipping"; \
-		fi \
-	done
+	@echo ------ qk tests ------
+	@$(call MKDIR,$(TEST_BUILD))
 
-# unit-tests
-test-c:
-	@echo "------ unit-tests ------"
-	@mkdir -p $(UT_BUILD)
-	@if [ ! -f "$(UT_BUILD)/unit-tests$(EXE)" ]; then \
-		echo "Compiling unit-tests"; \
-		$(CC) $(CFLAGS) -g $(LDFLAGS) $(UT_SRCS) -o $(UT_BUILD)/unit-tests$(EXE); \
+ifeq ($(PLATFORM),windows)
+	@if not "$(TEST_QK)"=="" ( \
+		for %%f in ($(TEST_QK)) do ( \
+			$(OUT) %%f -o $(TEST_BUILD)\%%~nf.c -l "$(CURDIR)" && \
+			$(CC) $(CFLAGS) -g $(TEST_BUILD)\%%~nf.c -o $(TEST_BUILD)\%%~nf$(EXE) \
+		) \
+	) else ( \
+		echo No .qk tests found \
+	)
+else
+	@set -e; \
+	if [ -n "$(TEST_QK)" ]; then \
+		for f in $(TEST_QK); do \
+			base=$$(basename $$f .qk); \
+			$(OUT) "$$f" -o "$(TEST_BUILD)/$$base.c" -l "$(CURDIR)"; \
+			$(CC) $(CFLAGS) -g "$(TEST_BUILD)/$$base.c" -o "$(TEST_BUILD)/$$base$(EXE)"; \
+		done; \
+	else \
+		echo "No .qk tests found"; \
 	fi
-	@echo "Running unit tests..."
+endif
+
+# ========= unit-tests =========
+test-c: dirs
+	@echo ------ unit-tests ------
+	$(CC) $(CFLAGS) -g $(UT_SRCS) $(SRCS) $(LDFLAGS) -o $(UT_BUILD)/unit-tests$(EXE)
 	@$(UT_BUILD)/unit-tests$(EXE)
 
-# only release build qc, tests all debug build
+# ========= Presets =========
 release:
 	$(MAKE) build MODE=release
 	$(MAKE) test-c
 
-# debug build qc
 debug:
 	$(MAKE) build MODE=debug
 	$(MAKE) test-c
 
-# Clean generated files
+# ========= Clean =========
 clean:
-ifeq ($(PLATFORM),windows)
-	del /Q $(BUILD_DIR)\* $(OUT)
-else
-	-rm -rf $(BUILD_DIR)/* $(OUT)
-endif
+	@$(call RM_RF,$(BUILD_DIR))
+	@$(call RM_F,$(OUT))
 
