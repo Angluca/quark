@@ -1,10 +1,12 @@
 #include "reference.h"
 #include "../type/types.h"
 
-Node* reference(Node* node, Trace trace) {
+Node* reference(Node* node, const Trace trace) {
     if(node->id == WrapperVariable && node->Wrapper.Variable.is_self_literal) {
-        *node->Wrapper.Variable.declaration->VariableDeclaration.type = *(Type*) (void*)
-                reference((void*) new_type(*node->Wrapper.Variable.declaration->VariableDeclaration.type), trace);
+        Type* const referenced_self = (void*) reference((void*) node->type, trace);
+        node->Wrapper.Variable.declaration->type = referenced_self;
+        node->type = referenced_self;
+
         return node;
     }
 

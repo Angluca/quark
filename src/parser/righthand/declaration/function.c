@@ -49,7 +49,7 @@ Node* parse_function_declaration(Type* return_type, IdentifierInfo info, Parser*
     declaration->body->parent = (void*) declaration;
 
     function_type->declaration = declaration;
-    info.identifier.parent_declaration = (void*) declaration;
+    function_type->declaration->identifier.parent_declaration = (void*) declaration;
 
     assign_generics_to_declaration((void*) declaration, info.generics_collection);
     push(&parser->stack, declaration->body);

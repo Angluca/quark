@@ -103,6 +103,10 @@ Type* peek_type(Type* type, Action* action, const unsigned flags) {
             return type->Wrapper.Auto.ref;
 
         case WrapperVariable:
+            if(apply_action(type->Wrapper.action, flags)) {
+                *action = type->Wrapper.action;
+            }
+
             return (void*) type->Wrapper.Variable.declaration->const_value;
 
         case NodeGenericReference:
