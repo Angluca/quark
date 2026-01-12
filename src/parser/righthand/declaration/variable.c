@@ -29,16 +29,49 @@ Node* parse_variable_declaration(Type* type, IdentifierInfo info, Parser* parser
     return (void*) variable_of((void*) declaration, declaration->trace, fIgnoreStatement);
 }
 
-// TODO: remove eval
-Node* create_temp_variable(Node* value, Parser* parser, unsigned* set_id) {
+Node* create_temp_variable(Node* const value, Parser* const parser, NodeVector* collector) {
     static unsigned id = 0;
-    if(set_id) *set_id = id;
 
-    Node* declaration = eval_w(parser->tokenizer->current.trace.filename,
-                               strf(NULL, "auto __qv%u = extern<auto> \"\";%c", id++, '\0').data, parser, &statement);
-    declaration->StatementWrapper.expression->BinaryOperation.right = value;
-    clash_types(declaration->StatementWrapper.expression->BinaryOperation.left->type, value->type, value->trace,
-                parser->tokenizer->messages, 0);
+    Declaration* declaration = (void*) new_node((Node) {
+        .VariableDeclaration = {
+            .id = NodeVariableDeclaration,
+            .trace = value->trace,
+            .flags = value->flags,
+            .type = value->type,
+            .identifier = {
+                .base = strf(0, "__qv%u", id++),
+                .parent_scope = (void*) last(parser->stack),
+            },
+            .observerd = true,
+        },
+    });
+    declaration->VariableDeclaration.identifier.parent_declaration = declaration;
+    push(&last(parser->stack)->hoisted_declarations, declaration);
 
-    return declaration;
+    Node* const variable = new_node((Node) {
+        .External = {
+            .id = NodeExternal,
+            .trace = value->trace,
+            .flags = value->flags,
+            .type = value->type,
+            .data = declaration->identifier.base,
+        },
+    });
+
+    Node* const assignment_statement = new_node((Node) {
+        .StatementWrapper = {
+            .id = NodeStatementWrapper,
+            .expression = new_node((Node) {
+                .BinaryOperation = {
+                    .id = NodeBinaryOperation,
+                    .left = variable,
+                    .operator = String("="),
+                    .right = value,
+                },
+            }),
+        },
+    });
+    push(collector, assignment_statement);
+
+    return variable;
 }

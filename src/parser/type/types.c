@@ -167,6 +167,7 @@ Type* make_type_standalone(Type* type) {
     ActionVector actions = { 0 };
     resv(&actions, global_actions.size);
     memcpy(actions.data, global_actions.data, global_actions.size * sizeof(Action));
+    actions.size = global_actions.size;
 
     return new_type((Type) {
         .Wrapper = {

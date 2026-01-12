@@ -146,5 +146,23 @@ int test_righthand() {
         assert_eq(tokenizer.current.type, 0);
     }
 
+    test("indexing pointers") {
+        Tokenizer tokenizer = new_tokenizer("TEST RIGHTHAND", "int* pointer; pointer[42]", &messages);
+        parser.tokenizer = &tokenizer;
+
+        unbox(statement(&parser));
+
+        Wrapper* deref = (void*) expression(&parser);
+        assert_eq(deref->id, WrapperSurround);
+        assert_eq(streq(deref->Surround.prefix, String("(*")), true);
+
+        assert_eq(deref->Surround.child->id, NodeBinaryOperation);
+        assert_eq(deref->Surround.child->BinaryOperation.right->id, NodeNumericLiteral);
+        assert_eq(deref->Surround.child->BinaryOperation.right->NumericLiteral.value, 42);
+
+        assert_eq(messages.size, 0);
+        assert_eq(tokenizer.current.type, 0);
+    }
+
     return print_result();
 }

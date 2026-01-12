@@ -32,8 +32,8 @@ void test_complete_test(const char* file, const char* name) {
 
 int test_print_result(const char* file) {
     printf("\n\33[3%d;1m%s %u / %u test(s) passed\33[0m\n\n",
-        (global_passed_tests == global_total_tests) + 1,
-        file, global_passed_tests, global_total_tests);
+           (global_passed_tests == global_total_tests) + 1,
+           file, global_passed_tests, global_total_tests);
     const int result = global_passed_tests != global_total_tests;
     global_passed_tests = global_total_tests = 0;
     return result;
@@ -51,8 +51,9 @@ int main() {
     init_node_arena(2048);
     populate_keyword_table();
 
-    test("unit-test test") {
+    test("unit-test assertion") {
         assert_eq(1, 1);
+        assert_eq(0, 0);
     }
 
     print_result();
