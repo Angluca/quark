@@ -19,6 +19,7 @@ enum {
     TokenDoubleEqual,
     TokenDoubleAnd,
     TokenDoubleOr,
+    TokenDoubleDot,
 
     TokenLessEqual,
     TokenGreaterEqual,

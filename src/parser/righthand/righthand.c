@@ -14,7 +14,7 @@ RighthandOperator global_righthand_operator_table[128] = {
     [TokenDoublePlus] = { 1, RightPostfixAssignment }, [TokenDoubleMinus] = { 1, RightPostfixAssignment },
     ['['] = { 1, RightIndex }, ['('] = { 1, RightCall },
     ['.'] = { 1, RightFieldAccess }, [TokenRightArrow] = { 1, RightFieldAccess },
-    ['?'] = { 1, RightOptional },
+    ['?'] = { 1, RightOptional }, [TokenDoubleDot] = { 1, RightRange },
 
     ['*'] = { 3, RightPostfixOrBinary }, ['/'] = { 3 }, ['%'] = { 3 },
 
@@ -71,6 +71,7 @@ Node* righthand_expression(Node* lefthand, Parser* parser, const unsigned char p
 
             case RightAssignment: check_assignable(lefthand, parser->tokenizer->messages);
             case RightCompare:
+            case RightRange:
             case RightBinary:
                 lefthand = parse_binary_operation(lefthand, operator, parser);
                 break;
