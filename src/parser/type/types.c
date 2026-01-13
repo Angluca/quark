@@ -88,25 +88,21 @@ void remove_action(Action action, const unsigned flags) {
 
 
 Type* peek_type(Type* type, Action* action, const unsigned flags) {
+    if(type->id == WrapperAuto || type->id == WrapperVariable || type->id == WrapperSurround) {
+        if(apply_action(type->Wrapper.action, flags)) {
+            *action = type->Wrapper.action;
+        }
+    }
+
     switch(type->id) {
         case WrapperAuto:
             if(global_in_compiler_step && type->Wrapper.Auto.replacement_generic) {
                 return peek_type((void*) type->Wrapper.Auto.replacement_generic, action, flags);
             }
 
-            if(!type->Wrapper.child) return type;
-
-            if(apply_action(type->Wrapper.action, flags)) {
-                *action = type->Wrapper.action;
-            }
-
-            return type->Wrapper.Auto.ref;
+            return type->Wrapper.Auto.ref ? type->Wrapper.Auto.ref : type;
 
         case WrapperVariable:
-            if(apply_action(type->Wrapper.action, flags)) {
-                *action = type->Wrapper.action;
-            }
-
             return (void*) type->Wrapper.Variable.declaration->const_value;
 
         case NodeGenericReference:

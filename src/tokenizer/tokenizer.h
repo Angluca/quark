@@ -41,7 +41,7 @@ struct Token;
 
 enum {
     KeywordActionNone,
-    KeywordActionSelf,
+    // KeywordActionSelf,
 
     KeywordActionStatement = 1 << 2,
     KeywordControlSingleCond,

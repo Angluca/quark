@@ -122,9 +122,11 @@ else
 endif
 
 # ========= unit-tests =========
-test-c: dirs
-	@echo ------ unit-tests ------
+build-test-c: dirs
 	$(CC) $(CFLAGS) -g $(UT_SRCS) $(SRCS) $(LDFLAGS) -o $(UT_BUILD)/unit-tests$(EXE)
+
+test-c: build-test-c
+	@echo ------ unit-tests ------
 	@$(UT_BUILD)/unit-tests$(EXE)
 
 # ========= Presets =========

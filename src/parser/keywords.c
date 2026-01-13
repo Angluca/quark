@@ -12,7 +12,6 @@ void populate_keyword_table() {
     put(&global_keyword_table, String("sizeof"), (Keyword) { KeywordActionNone, &keyword_sizeof });
     put(&global_keyword_table, String("const"), (Keyword) { KeywordActionNone, &keyword_const });
     put(&global_keyword_table, String("extern"), (Keyword) { KeywordActionNone, &keyword_extern });
-    put(&global_keyword_table, String("self"), (Keyword) { KeywordActionSelf, &keyword_self });
 
     put(&global_keyword_table, String("import"), (Keyword) { KeywordActionStatement, &keyword_import });
     put(&global_keyword_table, String("return"), (Keyword) { KeywordActionStatement, &keyword_return });

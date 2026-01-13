@@ -14,8 +14,8 @@ Node* parse_field_access(Node* lefthand, Parser* parser) {
     const OpenedType opened = open_type(type, 0);
     StructType* const struct_type = (void*) opened.type;
 
-    String operator_token = next(parser->tokenizer).trace.source;
-    Token field_token = expect(parser->tokenizer, TokenIdentifier);
+    const String operator_token = next(parser->tokenizer).trace.source;
+    const Token field_token = expect(parser->tokenizer, TokenIdentifier);
 
     if(struct_type->id != NodeStructType) {
         push(parser->tokenizer->messages, REPORT_ERR(lefthand->trace,
@@ -37,7 +37,6 @@ Node* parse_field_access(Node* lefthand, Parser* parser) {
         if(child) {
             lefthand->type = make_type_standalone(lefthand->type);
             child->Variable.bound_self_argument = lefthand;
-
             child->type = make_type_standalone(child->type);
 
             close_type(opened.actions, 0);
@@ -45,6 +44,9 @@ Node* parse_field_access(Node* lefthand, Parser* parser) {
                        ? new_node((Node) {
                            .Wrapper = {
                                .id = WrapperSurround,
+                               .flags = child->flags,
+                               .trace = child->trace,
+                               .type = child->type,
                                .action = child->type->Wrapper.action,
                                .Surround.child = (void*) child,
                            },

@@ -115,9 +115,9 @@ int main(int argc, char** argv) {
     }
 
     for(size_t i = 0; i < compiler.sections.size; i++) {
-        if(i) fprintf(out, "\n");
         for(size_t j = 0; j < compiler.sections.data[i].lines.size; j++) {
             fprintf(out, "%.*s\n", PRINT(compiler.sections.data[i].lines.data[j]));
         }
+        if(i) fprintf(out, "\n");
     }
 }

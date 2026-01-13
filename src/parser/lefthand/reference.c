@@ -2,14 +2,6 @@
 #include "../type/types.h"
 
 Node* reference(Node* node, const Trace trace) {
-    if(node->id == WrapperVariable && node->Wrapper.Variable.is_self_literal) {
-        Type* const referenced_self = (void*) reference((void*) node->type, trace);
-        node->Wrapper.Variable.declaration->type = referenced_self;
-        node->type = referenced_self;
-
-        return node;
-    }
-
     if(node->flags & fType) {
         return (void*) new_type((Type) {
             .PointerType = {

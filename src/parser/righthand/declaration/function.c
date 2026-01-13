@@ -8,6 +8,7 @@
 #include "../righthand.h"
 #include "../../literal/wrapper.h"
 #include "parser/lefthand/lefthand.h"
+#include "parser/lefthand/reference.h"
 
 static int recycle_missing_generics(Type* missing, Type* ignore, void* void_parser) {
     (void) ignore;
@@ -24,6 +25,28 @@ static int recycle_missing_generics(Type* missing, Type* ignore, void* void_pars
 
     unbox((void*) possible_found);
     return 0;
+}
+
+static Argument create_self_literal(const Trace trace, StructType* const parent_struct, Parser* parser, bool is_ref) {
+    Type* type;
+
+    if(parent_struct->id != NodeStructType) {
+        push(parser->tokenizer->messages,
+             REPORT_ERR(trace, String("Cannot create self literal outside of a struct declaration")));
+        type = new_type((Type) { .Wrapper = { WrapperAuto, 0, trace } });
+    } else {
+        Wrapper* wrapper = variable_of((void*) parent_struct->parent, trace, 0);
+        apply_type_arguments(wrapper, parser);
+        type = wrapper->type;
+        unbox((void*) wrapper);
+    }
+
+    const Argument argument = {
+        .type = is_ref ? (void*) reference((void*) type, trace) : type,
+        .identifier = String("self"),
+    };
+
+    return argument;
 }
 
 Node* parse_function_declaration(Type* return_type, IdentifierInfo info, Parser* parser) {
@@ -62,24 +85,23 @@ Node* parse_function_declaration(Type* return_type, IdentifierInfo info, Parser*
     while(parser->tokenizer->current.type && parser->tokenizer->current.type != ')') {
         Argument argument = { 0 };
 
-        // TODO: remove self keyword
-        if(parser->tokenizer->current.type == TokenIdentifier
-           && streq(parser->tokenizer->current.trace.source, String("self"))) {
-            StructType* const parent_structure = (void*) declaration->identifier.parent_scope;
-
-            if(parent_structure->id == NodeStructType) {
-                const Trace trace = next(parser->tokenizer).trace;
-                argument.identifier = trace.source;
-
-                Wrapper* wrapper = variable_of((void*) parent_structure->parent, trace, 0);
-                apply_type_arguments(wrapper, parser);
-                argument.type = wrapper->type;
-                unbox((void*) wrapper);
+        if(parser->tokenizer->current.type == '&') {
+            const Token snapshot = next(parser->tokenizer);
+            if(parser->tokenizer->current.type == TokenIdentifier
+               && streq(parser->tokenizer->current.trace.source, String("self"))) {
+                argument = create_self_literal(stretch(snapshot.trace, next(parser->tokenizer).trace),
+                                               (void*) declaration->identifier.parent_scope, parser, true);
+            } else {
+                parser->tokenizer->current = snapshot;
             }
+        } else if(parser->tokenizer->current.type == TokenIdentifier
+                  && streq(parser->tokenizer->current.trace.source, String("self"))) {
+            argument = create_self_literal(next(parser->tokenizer).trace, (void*) declaration->identifier.parent_scope,
+                                           parser, false);
         }
 
         if(!argument.type) {
-            argument.type = (void*) righthand_expression(lefthand_expression(parser), parser, RightDeclaration);
+            argument.type = (void*) righthand_expression(lefthand_expression(parser), parser, 13);
             argument.identifier = expect(parser->tokenizer, TokenIdentifier).trace.source;
         }
 
