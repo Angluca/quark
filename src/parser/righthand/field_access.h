@@ -5,4 +5,6 @@
 
 Node* parse_field_access(Node* lefthand, Parser* parser);
 
+Node* parse_indexing(Node* lefthand, Parser* parser);
+
 #endif

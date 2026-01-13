@@ -81,24 +81,9 @@ Node* righthand_expression(Node* lefthand, Parser* parser, const unsigned char p
                 lefthand = parse_declaration(lefthand, next(parser->tokenizer), parser);
                 break;
 
-            case RightIndex: {
-                next(parser->tokenizer);
-                Node* const index = expression(parser);
-
-                Node* const offset = new_node((Node) {
-                    .BinaryOperation = {
-                        .id = NodeBinaryOperation,
-                        .type = lefthand->type,
-                        .left = lefthand,
-                        .operator = String("+"),
-                        .right = index,
-                    }
-                });
-
-                lefthand = dereference(offset, stretch(lefthand->trace, expect(parser->tokenizer, ']').trace),
-                                       parser->tokenizer->messages);
+            case RightIndex:
+                lefthand = parse_indexing(lefthand, parser);
                 break;
-            }
 
             case RightCall:
                 lefthand = parse_function_call(lefthand, parser);

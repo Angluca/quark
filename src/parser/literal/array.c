@@ -1,18 +1,37 @@
 #include "array.h"
+
+#include "clargs.h"
+#include "wrapper.h"
 #include "../statement/statement.h"
 #include "../righthand/righthand.h"
 #include "../type/clash_types.h"
 #include "../type/types.h"
+#include "parser/statement/scope.h"
+
+Declaration* fetch_slice_declaration(Parser* parser) {
+    static Declaration* declaration = NULL;
+
+    if(!declaration) {
+        declaration = find_on_stack_unwrapped(parser->stack, String("Slice"));
+
+        if(!declaration) {
+            panicf("[fatal] failed to find declaration for '\33[35mSlice<T>\33[0m'");
+        }
+    }
+
+    return declaration;
+}
 
 Node* parse_array_literal(const Trace trace_start, Parser* parser) {
     const NodeVector field_values = collect_until(parser, &expression, ',', ']');
 
     if(field_values.data && field_values.data[0]->flags & fType) {
-        // TODO: check if not Slice
-        // TODO: (or) remove `eval`s
-        Type* slice = (void*) eval(NULL, "Slice", parser);
-        clash_types(slice->Wrapper.action.generics.data[0], (void*) field_values.data[0], field_values.data[0]->trace,
-                    parser->tokenizer->messages, 0);
+        Wrapper* slice = variable_of(fetch_slice_declaration(parser), field_values.data[0]->trace, 0);
+
+        TypeVector generics = { 0 };
+        push(&generics, (void*) field_values.data[0]);
+        slice->action = (Action) { ActionApplyGenerics, generics, slice->Variable.declaration };
+
         return (void*) slice;
     }
 

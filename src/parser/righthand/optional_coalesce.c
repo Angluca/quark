@@ -17,7 +17,7 @@ Node* parse_optional_coalescing(Node* lefthand, Parser* parser) {
         optional_declaration = find_on_stack_unwrapped(parser->stack, String("Option"));
 
         if(!optional_declaration) {
-            // TODO: add guard to Slice<T> too
+            // TODO: add guard to Slice<T>, str, and char_literal too
             panicf("[fatal] Unable to find definition for '\33[35mOption<T>\33[35m'\n");
         }
     }
