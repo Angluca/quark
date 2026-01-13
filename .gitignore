@@ -7,14 +7,13 @@
 # CLion builds
 *.dSYM/
 
-# Local testing
+# bin
 qc
-testing/
-tests/
-build/
+main
 
 # Unit tests
 unit-tests/unit-tests
 
 # Build
 build/
+
