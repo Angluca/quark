@@ -4,16 +4,19 @@
 # MacOS
 .DS_Store
 
-# CLion builds
+# Debugger Tools
 *.dSYM/
 
 # bin
 qc
 main
 
-# Unit tests
+# Local Testing
+tests/
+testing/
+
+# Unit Tests
 unit-tests/unit-tests
 
 # Build
 build/
-
