@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
 
     populate_keyword_table();
 
-    // push(&entry->body->children, eval_w("lib::std", "import lib::std;", &parser, &statement));
+    push(&entry->body->children, eval_w("lib::std", "import lib::std;", &parser, &statement));
     const NodeVector body = collect_until(&parser, &statement, 0, 0);
     resv(&entry->body->children, body.size);
     for(size_t i = 0; i < body.size; i++) {
