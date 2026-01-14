@@ -11,4 +11,6 @@ void comp_External(void* void_self, String* line, Compiler* compiler);
 
 void comp_StructLiteral(void* void_self, String* line, Compiler* compiler);
 
+void comp_Cast(void* void_self, String* line, Compiler* compiler);
+
 #endif

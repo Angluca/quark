@@ -38,3 +38,12 @@ void comp_StructLiteral(void* void_self, String* line, Compiler* compiler) {
     }
     strf(line, " }");
 }
+
+void comp_Cast(void* void_self, String* line, Compiler* compiler) {
+    Cast* const self = void_self;
+
+    strf(line, "(");
+    compile(self->type, line, compiler);
+    strf(line, ") ");
+    compile(self->value, line, compiler);
+}

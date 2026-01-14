@@ -10,12 +10,16 @@ void comp_Variable(void* void_self, String* line, Compiler* compiler) {
     Node* const const_value = self->Variable.declaration->const_value;
     if(const_value && const_value->flags & fConstExpr) {
         if(!(self->flags & fType)) {
-            strf(line, "(");
+            strf(line, "((");
             compile(self->type, line, compiler);
             strf(line, ") ");
         }
 
         compile(const_value, line, compiler);
+
+        if(!(self->flags & fType)) {
+            strf(line, ")");
+        }
     } else {
         compile_identifier(self->Variable.declaration->identifier, line);
     }

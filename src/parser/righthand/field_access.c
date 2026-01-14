@@ -10,15 +10,34 @@
 #include "declaration/variable.h"
 
 Node* parse_field_access(Node* lefthand, Parser* parser) {
+    const String operator_token = next(parser->tokenizer).trace.source;
+
+    if(*operator_token.data == '.' && try(parser->tokenizer, '(', NULL)) {
+        Type* cast = (void*) expression(parser);
+
+        if(!(cast->flags & fType)) {
+            push(parser->tokenizer->messages, REPORT_ERR(cast->trace, String("cast is not a type")));
+            cast = cast->type;
+        }
+
+        return new_node((Node) {
+            .Cast = {
+                .id = NodeCast,
+                .type = cast,
+                .trace = stretch(lefthand->trace, expect(parser->tokenizer, ')').trace),
+                .value = lefthand,
+            },
+        });
+    }
+
     Type* type = lefthand->type;
-    if(parser->tokenizer->current.type == TokenRightArrow) {
+    if(*operator_token.data == '-') {
         type = (void*) dereference((void*) type, lefthand->trace, parser->tokenizer->messages);
     }
 
     const OpenedType opened = open_type(type, 0);
     StructType* const struct_type = (void*) opened.type;
 
-    const String operator_token = next(parser->tokenizer).trace.source;
     const Token field_token = expect(parser->tokenizer, TokenIdentifier);
 
     if(struct_type->id != NodeStructType) {

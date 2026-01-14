@@ -3,10 +3,11 @@
 
 #include "../../compiler.h"
 
-
 typedef HashMap(UsableVoid) StringHashSet;
+typedef HashMap(Declaration*) DeclarationHashMap;
 
 extern StringHashSet global_c_keywords;
+extern DeclarationHashMap global_function_identifiers;
 
 void compile_identifier_base(String base, String* line);
 
