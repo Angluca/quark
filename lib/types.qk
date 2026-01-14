@@ -27,3 +27,5 @@ type ULong = extern int "unsigned long";
 type bool = extern int bool;
 type File = extern FILE;
 type void = extern void;
+
+struct Operator {}
