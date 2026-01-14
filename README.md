@@ -9,10 +9,6 @@
 > sure to use the [latest release](https://github.com/quark-programming/quark/releases) You can see and submit issues
 > on the repository's [issues page](https://github.com/quark-programming/quark/issues)
 
-> [!CAUTION]
-> The main branch is currently being worked through an issue, download the more stable release,
-> [0.3.0](https://github.com/quark-programming/quark/releases/tag/0.3.0), instead of cloning
-
 ## Building the Compiler
 
 To build the Compiler:
