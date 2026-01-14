@@ -9,6 +9,8 @@
 > sure to use the [latest release](https://github.com/quark-programming/quark/releases) You can see and submit issues
 > on the repository's [issues page](https://github.com/quark-programming/quark/issues)
 
+<img alt="Quark Language Screenshot" src="assets/screenshot-1.png" />
+
 ## Building the Compiler
 
 To build the Compiler:
@@ -42,6 +44,8 @@ Programming Language
 
 - [Angluca/quark.vim](https://github.com/Angluca/quark.vim) - Vim plugin for Quark language
 - [Angluca/quark_template](https://github.com/Angluca/quark_template) - Project template for Quark-lang
+- [Angluca/quark_raylib_template](https://github.com/Angluca/quark_raylib_template) - A template for using Quark with 
+Raylib
 
 ## Contributing
 
