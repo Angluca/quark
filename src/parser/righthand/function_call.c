@@ -6,14 +6,22 @@
 #include "../lefthand/reference.h"
 #include "../type/clash_types.h"
 #include "declaration/declaration.h"
+#include "parser/statement/scope.h"
 
-Node* parse_function_call(Node* function, Parser* parser) {
-    next(parser->tokenizer);
+Declaration* fetch_operator_override(Type* type, const String override) {
+    const OpenedType open = open_type(type, 0);
+    close_type(open.actions, 0);
+    if(open.type->id != NodeStructType) return NULL;
 
+    Scope* const overrides_scope = get(open.type->StructType.reference_structures, String("Operator"));
+    if(!overrides_scope) return NULL;
+
+    return find_in_scope_unwrapped(*overrides_scope, override);
+}
+
+Node* call_function(Node* function, NodeVector arguments, Parser* const parser) {
     const OpenedType opened_function_type = open_type(function->type, 0);
     FunctionType* const function_type = (void*) opened_function_type.type;
-
-    NodeVector arguments = collect_until(parser, &expression, ',', ')');
 
     if(function_type->id != NodeFunctionType) {
         push(parser->tokenizer->messages, REPORT_ERR(function->trace, String("calling a non-function value")));
@@ -67,4 +75,12 @@ Node* parse_function_call(Node* function, Parser* parser) {
             .arguments = arguments,
         }
     });
+}
+
+Node* parse_function_call(Node* function, Parser* parser) {
+    next(parser->tokenizer);
+
+    NodeVector arguments = collect_until(parser, &expression, ',', ')');
+
+    return call_function(function, arguments, parser);
 }

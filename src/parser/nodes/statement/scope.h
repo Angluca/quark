@@ -5,10 +5,12 @@
 
 #include "../fields.h"
 
+typedef HashMap(Declaration*) DeclarationHashMap;
+
 typedef struct Scope {
     NODE_FIELDS;
     NodeVector children;
-    HashMap(Declaration*) variables;
+    DeclarationHashMap variables;
     DeclarationVector hoisted_declarations;
     Declaration* parent;
     Node* result_value;

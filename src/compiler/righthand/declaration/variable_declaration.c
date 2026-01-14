@@ -18,6 +18,13 @@ static void compile_struct_declaration(StructType* self, String* line, Compiler*
 
     push(&compiler->sections.data[0].lines, typedef_line);
     compile(self->static_body, line, compiler);
+
+    if(!self->reference_structures) return;
+    for(size_t i = 0; i < sizeof(*self->reference_structures) / sizeof(**self->reference_structures); i++) {
+        for(size_t j = 0; j < (*self->reference_structures)[i].size; j++) {
+            compile(&(*self->reference_structures)[i].data[j].v, line, compiler);
+        }
+    }
 }
 
 void comp_VariableDeclaration(void* void_self, String* line, Compiler* compiler) {
