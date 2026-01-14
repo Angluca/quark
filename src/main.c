@@ -10,7 +10,7 @@
 #include "compiler/righthand/declaration/identifier.h"
 
 #define QUARK_VERSION "0.3.1d"
-#define QUARK_STABILITY "dev"
+#define QUARK_STABILITY "untested"
 
 typedef Vector(char*) CStringVector;
 
