@@ -7,6 +7,7 @@
 #include "parser/statement/statement.h"
 #include "parser/type/types.h"
 #include "parser/keywords.h"
+#include "compiler/righthand/declaration/identifier.h"
 
 #define QUARK_VERSION "0.3.1b"
 #define QUARK_STABILITY "untested"
@@ -47,8 +48,10 @@ int main(int argc, char** argv) {
     CStringVector input_files = { 0 };
     char* output_file = "out.c";
 
+    CStringVector include_paths = { 0 };
+
     int flag;
-    while((flag = clflag()))
+    while((flag = clflag())) {
         switch(flag) {
             case 'h':
                 printf(help_message, name, name);
@@ -56,14 +59,27 @@ int main(int argc, char** argv) {
             case 'v':
                 puts("Quark Compiler version " QUARK_VERSION " \33[90m" QUARK_STABILITY "\33[0m");
                 return 0;
-            case -1: push(&input_files, clarg());
+            case -1:
+                push(&input_files, clarg());
                 break;
-            case 'o': output_file = clarg();
+            case 'o':
+                output_file = clarg();
                 break;
-            case 'l': global_library_path = clarg();
+            case 'l':
+                global_library_path = clarg();
+                break;
+            case 'i':
+                push(&include_paths, clarg());
                 break;
             default: panicf("unknown flag '-%c'\n hint: %s -h\n", flag, name);
         }
+    }
+
+    push(&include_paths, "stdint.h");
+    push(&include_paths, "stdio.h");
+    push(&include_paths, "string.h");
+    push(&include_paths, "stdlib.h");
+    push(&include_paths, "stdbool.h");
 
     if(input_files.size == 0) {
         panicf("missing input files\n hint: %s -h\n", name);
@@ -84,11 +100,15 @@ int main(int argc, char** argv) {
 
     push(&compiler.sections, (CompilerSection) { 0 });
     push(&compiler.sections, (CompilerSection) { 0 });
-    push(&compiler.sections.data[0].lines, String("#include <stdint.h>"));
-    push(&compiler.sections.data[0].lines, String("#include <stdio.h>"));
-    push(&compiler.sections.data[0].lines, String("#include <string.h>"));
-    push(&compiler.sections.data[0].lines, String("#include <stdlib.h>"));
-    push(&compiler.sections.data[0].lines, String("#include <stdbool.h>"));
+
+    for(size_t i = 0; i < include_paths.size; i++) {
+        push(&compiler.sections.data[0].lines, strf(0, "#include \"%s\"", include_paths.data[i]));
+    }
+    // push(&compiler.sections.data[0].lines, String("#include <stdint.h>"));
+    // push(&compiler.sections.data[0].lines, String("#include <stdio.h>"));
+    // push(&compiler.sections.data[0].lines, String("#include <string.h>"));
+    // push(&compiler.sections.data[0].lines, String("#include <stdlib.h>"));
+    // push(&compiler.sections.data[0].lines, String("#include <stdbool.h>"));
 
     push(&parser.stack, new_scope(NULL));
 
@@ -96,6 +116,7 @@ int main(int argc, char** argv) {
     push(&parser.stack, entry->body);
 
     populate_keyword_table();
+    populate_global_c_keywords();
 
     push(&entry->body->children, eval_w("lib::std", "import lib::std;", &parser, &statement));
     const NodeVector body = collect_until(&parser, &statement, 0, 0);

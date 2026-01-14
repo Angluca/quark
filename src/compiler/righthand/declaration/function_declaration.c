@@ -19,7 +19,10 @@ static void function_declaration_compiler_hoisted(FunctionDeclaration* const sel
         if(i) strf(&declaration_line, ", ");
 
         compile(self->arguments.data[i].type, &declaration_line, compiler);
-        if(!hoisted) strf(&declaration_line, " %.*s", PRINT(self->arguments.data[i].identifier));
+        if(!hoisted) {
+            strf(&declaration_line, " ");
+            compile_identifier_base(self->arguments.data[i].identifier, &declaration_line);
+        }
     }
     strf(&declaration_line, hoisted ? ");" : ") {");
     push(&compiler->sections.data[(size_t) hoisted ? (size_t) hoisted : section].lines, declaration_line);
