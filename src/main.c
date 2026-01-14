@@ -8,7 +8,7 @@
 #include "parser/type/types.h"
 #include "parser/keywords.h"
 
-#define QUARK_VERSION "0.3.1a"
+#define QUARK_VERSION "0.3.1b"
 #define QUARK_STABILITY "untested"
 
 typedef Vector(char*) CStringVector;
