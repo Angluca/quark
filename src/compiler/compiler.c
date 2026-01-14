@@ -35,6 +35,7 @@ void compile(void* void_node, String* line, Compiler* compiler) {
         [NodeControlStatement] = &comp_ControlStatement,
         [NodeStructType] = &comp_StructType,
         [NodeStructLiteral] = &comp_StructLiteral,
+        [NodeCast] = &comp_Cast,
     };
 
     Node* const node = void_node;

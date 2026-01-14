@@ -11,6 +11,7 @@
 #include "../statement/structure.h"
 #include "../literal/number.h"
 #include "../keywords.h"
+#include "parser/type/clash_types.h"
 
 Node* lefthand_expression(Parser* parser) {
     Token token = next(parser->tokenizer);
@@ -53,6 +54,21 @@ Node* lefthand_expression(Parser* parser) {
             // TODO: wrap in surround and remove parenthesis in compiler to remove redundant parenthesis
             Node* expr = expression(parser);
             expect(parser->tokenizer, ')');
+
+            if(expr->flags & fType) {
+                Node* value = righthand_expression(lefthand_expression(parser), parser, 2);
+                clash_types((void*) expr, value->type, expr->trace, parser->tokenizer->messages, 0);
+
+                return new_node((Node) {
+                    .Cast = {
+                        .id = NodeCast,
+                        .type = (void*) expr,
+                        .trace = expr->trace,
+                        .value = value,
+                    },
+                });
+            }
+
             return new_node((Node) {
                 .Wrapper = {
                     .id = WrapperSurround,
