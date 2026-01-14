@@ -64,7 +64,6 @@ Node* parse_function_declaration(Type* return_type, IdentifierInfo info, Parser*
     FunctionDeclaration* declaration = (void*) new_node((Node) {
         .FunctionDeclaration = {
             .id = NodeFunctionDeclaration,
-            .flags = info.identifier.is_external,
             .trace = trace_start,
             .type = (void*) function_type,
             .identifier = info.identifier,
