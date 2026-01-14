@@ -20,6 +20,8 @@ void populate_global_c_keywords() {
     }
 }
 
+DeclarationHashMap global_function_identifiers = 0;
+
 void compile_identifier_base(const String base, String* line) {
     strf(line, "%.*s", PRINT(base));
 
@@ -29,27 +31,53 @@ void compile_identifier_base(const String base, String* line) {
 }
 
 void compile_identifier(const Identifier identifier, String* line) {
+    String result = { 0 };
+
     if(!identifier.is_external) {
         if(identifier.parent_scope && identifier.parent_scope->id == NodeFunctionDeclaration) {
             const Identifier parent_ident = identifier.parent_scope->FunctionDeclaration.identifier;
-            compile_identifier(parent_ident, line);
-            strf(line, "__");
+            compile_identifier(parent_ident, &result);
+            strf(&result, "__");
         }
 
         if(identifier.parent_scope && identifier.parent_scope->id == NodeStructType
            && !(identifier.parent_declaration->id == NodeVariableDeclaration
                 && !(identifier.parent_declaration->type->flags & fType))) {
             const Identifier parent_ident = ((StructType*) (void*) identifier.parent_scope)->parent->identifier;
-            compile_identifier(parent_ident, line);
-            strf(line, "__");
+            compile_identifier(parent_ident, &result);
+            strf(&result, "__");
         }
     }
 
     // TODO: change `PRINT` macro to `FMT` or `STRFMT`
-    compile_identifier_base(identifier.base, line);
+    compile_identifier_base(identifier.base, &result);
 
     if(identifier.parent_declaration->generics.type_arguments_stack.size && !identifier.is_external) {
-        stringify_generics(line, last(identifier.parent_declaration->generics.type_arguments_stack),
+        stringify_generics(&result, last(identifier.parent_declaration->generics.type_arguments_stack),
                            StringifyAlphaNumeric);
     }
+
+    if(identifier.function_declaration_counter) strf(&result, "%u", identifier.function_declaration_counter);
+
+    if(!identifier.function_declaration_counter && identifier.parent_declaration->id == NodeFunctionDeclaration) {
+        const size_t initial_size = result.size;
+        unsigned counter = 0;
+        Declaration** existing_declaration;
+
+        while(((existing_declaration = get(global_function_identifiers, result)))
+              && *existing_declaration != identifier.parent_declaration) {
+            result.size = initial_size;
+            strf(&result, "%u", ++counter);
+        }
+
+        if(counter) {
+            identifier.parent_declaration->identifier.function_declaration_counter = counter;
+        }
+
+        if(!existing_declaration) {
+            put(&global_function_identifiers, result, identifier.parent_declaration);
+        }
+    }
+
+    strf(line, "%.*s", PRINT(result));
 }
