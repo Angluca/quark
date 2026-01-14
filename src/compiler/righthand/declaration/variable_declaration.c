@@ -10,7 +10,9 @@ static void compile_struct_declaration(StructType* self, String* line, Compiler*
     strf(&typedef_line, " { ");
     for(size_t i = 0; i < self->fields.size; i++) {
         compile(self->fields.data[i].type, &typedef_line, compiler);
-        strf(&typedef_line, " %.*s; ", PRINT(self->fields.data[i].identifier));
+        strf(&typedef_line, " ");
+        compile_identifier_base(self->fields.data[i].identifier, &typedef_line);
+        strf(&typedef_line, "; ");
     }
     strf(&typedef_line, "};");
 

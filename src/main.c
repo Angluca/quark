@@ -7,6 +7,7 @@
 #include "parser/statement/statement.h"
 #include "parser/type/types.h"
 #include "parser/keywords.h"
+#include "compiler/righthand/declaration/identifier.h"
 
 #define QUARK_VERSION "0.3.1b"
 #define QUARK_STABILITY "untested"
@@ -96,6 +97,7 @@ int main(int argc, char** argv) {
     push(&parser.stack, entry->body);
 
     populate_keyword_table();
+    populate_global_c_keywords();
 
     push(&entry->body->children, eval_w("lib::std", "import lib::std;", &parser, &statement));
     const NodeVector body = collect_until(&parser, &statement, 0, 0);
