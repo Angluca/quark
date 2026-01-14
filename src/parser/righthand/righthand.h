@@ -24,6 +24,7 @@ typedef struct RighthandOperator {
 } RighthandOperator;
 
 extern RighthandOperator global_righthand_operator_table[];
+extern char* global_righthand_override_table[];
 extern bool global_righthand_collecting_type_arguments;
 
 Node* expression(Parser* parser);

@@ -6,6 +6,7 @@
 #include "../lefthand/reference.h"
 #include "../type/clash_types.h"
 #include "declaration/declaration.h"
+#include "parser/literal/wrapper.h"
 #include "parser/statement/scope.h"
 
 Declaration* fetch_operator_override(Type* type, const String override) {
@@ -17,6 +18,25 @@ Declaration* fetch_operator_override(Type* type, const String override) {
     if(!overrides_scope) return NULL;
 
     return find_in_scope_unwrapped(*overrides_scope, override);
+}
+
+Node* operator_override(Type* type, Node* self, Node* argument, const String override, const Trace trace,
+                        Parser* parser) {
+    Declaration* const operator_override = fetch_operator_override(type, override);
+    if(!operator_override) return NULL;
+
+    NodeVector arguments = { 0 };
+    push(&arguments, argument);
+
+    Wrapper* override_variable = variable_of(operator_override, trace, 0);
+    OpenedType const opened_lefthand = open_type(type, 0);
+
+    override_variable->Variable.bound_self_argument = self;
+    override_variable->type = make_type_standalone(override_variable->type);
+    if(global_actions.size) override_variable->action = override_variable->type->Wrapper.action;
+
+    close_type(opened_lefthand.actions, 0);
+    return call_function((void*) override_variable, arguments, parser);
 }
 
 Node* call_function(Node* function, NodeVector arguments, Parser* const parser) {

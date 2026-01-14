@@ -176,21 +176,8 @@ Node* parse_indexing(Node* lefthand, Parser* parser) {
     }
     close_type(opened_index.actions, 0);
 
-    Declaration* const override = fetch_operator_override(lefthand->type, String("index"));
-    if(override) {
-        NodeVector arguments = { 0 };
-        // push(&arguments, lefthand);
-        push(&arguments, index);
-
-        Wrapper* override_variable = variable_of(override, index->trace, 0);
-        OpenedType const opened_lefthand = open_type(lefthand->type, 0);
-        override_variable->Variable.bound_self_argument = lefthand;
-        override_variable->type = make_type_standalone(override_variable->type);
-        if(global_actions.size) override_variable->action = override_variable->type->Wrapper.action;
-        close_type(opened_lefthand.actions, 0);
-
-        return call_function((void*) override_variable, arguments, parser);
-    }
+    Node* const override = operator_override(lefthand->type, lefthand, index, String("index"), index->trace, parser);
+    if(override) return override;
 
     Node* const offset = new_node((Node) {
         .Wrapper = {

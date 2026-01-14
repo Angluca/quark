@@ -40,6 +40,11 @@ RighthandOperator global_righthand_operator_table[128] = {
     [TokenOrEqual] = { 14, RightAssignment },
 };
 
+char* global_righthand_override_table[128] = {
+    ['+'] = "add", ['-'] = "subtract", ['*'] = "multiply", ['/'] = "divide", ['%'] = "modulo",
+    [TokenDoubleEqual] = "equals",
+};
+
 bool global_righthand_collecting_type_arguments = false;
 
 Node* expression(Parser* parser) {
