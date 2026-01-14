@@ -13,6 +13,18 @@
 #include "../keywords.h"
 #include "parser/type/clash_types.h"
 
+Type* boolean_type() {
+    static Type boolean_type = {
+        .External = {
+            .id = NodeExternal,
+            .type = &boolean_type,
+            .flags = fType | fNumeric,
+            .data = String("bool"),
+        },
+    };
+    return &boolean_type;
+}
+
 Node* lefthand_expression(Parser* parser) {
     Token token = next(parser->tokenizer);
 
@@ -94,6 +106,18 @@ Node* lefthand_expression(Parser* parser) {
         }
 
         case '[': return parse_array_literal(token.trace, parser);
+
+        case '!': {
+            Node* expr = righthand_expression(lefthand_expression(parser), parser, 2);
+            return new_node((Node) {
+                .Wrapper = {
+                    .id = WrapperSurround,
+                    .type = boolean_type(),
+                    .trace = expr->trace,
+                    .Surround = { expr, String("!") },
+                },
+            });
+        }
 
         default:
             push(parser->tokenizer->messages, REPORT_ERR(token.trace,
