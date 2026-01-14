@@ -16,6 +16,4 @@ Node* keyword_const(Token token, Parser* parser);
 
 Node* keyword_extern(Token token, Parser* parser);
 
-Node* keyword_self(Token token, Parser* parser);
-
 #endif

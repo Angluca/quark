@@ -9,7 +9,7 @@
 #include "vector.h"
 #include "helpers.h"
 
-typedef Vector(char) String;
+typedef Vector(char, String) String;
 
 typedef Vector(String) StringVector;
 

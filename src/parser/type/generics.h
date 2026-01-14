@@ -8,12 +8,12 @@ Type* wrap_applied_generics(Type* type, TypeVector generics, Declaration* declar
 
 void apply_type_arguments(Wrapper* variable, Parser* parser);
 
-typedef Vector(Declaration**) DeclarationSetterVector;
+// typedef Vector(Declaration**) DeclarationSetterVector;
 
 typedef struct GenericsCollection {
     TypeVector base_type_arguments;
     Scope* generic_declarations_scope;
-    DeclarationSetterVector declaration_setters;
+    // DeclarationSetterVector declaration_setters;
 } GenericsCollection;
 
 GenericsCollection collect_generics(Parser* parser);

@@ -19,6 +19,7 @@ enum {
     TokenDoubleEqual,
     TokenDoubleAnd,
     TokenDoubleOr,
+    TokenDoubleDot,
 
     TokenLessEqual,
     TokenGreaterEqual,
@@ -41,7 +42,7 @@ struct Token;
 
 enum {
     KeywordActionNone,
-    KeywordActionSelf,
+    // KeywordActionSelf,
 
     KeywordActionStatement = 1 << 2,
     KeywordControlSingleCond,

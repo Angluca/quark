@@ -10,6 +10,11 @@
 # Local testing
 qc
 testing/
+tests/
+build/
 
 # Unit tests
 unit-tests/unit-tests
+
+# Build
+build/

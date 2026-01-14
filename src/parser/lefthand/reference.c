@@ -1,13 +1,7 @@
 #include "reference.h"
 #include "../type/types.h"
 
-Node* reference(Node* node, Trace trace) {
-    if(node->id == WrapperVariable && node->Wrapper.Variable.is_self_literal) {
-        *node->Wrapper.Variable.declaration->VariableDeclaration.type = *(Type*) (void*)
-                reference((void*) new_type(*node->Wrapper.Variable.declaration->VariableDeclaration.type), trace);
-        return node;
-    }
-
+Node* reference(Node* node, const Trace trace) {
     if(node->flags & fType) {
         return (void*) new_type((Type) {
             .PointerType = {
@@ -24,7 +18,7 @@ Node* reference(Node* node, Trace trace) {
             .id = WrapperSurround,
             .trace = trace,
             .type = (void*) reference((void*) node->type, trace),
-            .Surround = { node, String("&") },
+            .Surround = { node, String("(&"), String(")") },
         }
     });
 }
@@ -50,7 +44,7 @@ Node* dereference(Node* node, Trace trace, MessageVector* messages) {
             .flags = fMutable,
             .trace = trace,
             .type = (void*) dereference((void*) node->type, trace, messages),
-            .Surround = { node, String("*") },
+            .Surround = { node, String("(*"), String(")") },
         }
     });
 }

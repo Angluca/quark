@@ -15,6 +15,7 @@ enum {
     RightCompare,
     RightIndex,
     RightOptional,
+    RightRange,
 };
 
 typedef struct RighthandOperator {

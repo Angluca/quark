@@ -14,7 +14,7 @@ RighthandOperator global_righthand_operator_table[128] = {
     [TokenDoublePlus] = { 1, RightPostfixAssignment }, [TokenDoubleMinus] = { 1, RightPostfixAssignment },
     ['['] = { 1, RightIndex }, ['('] = { 1, RightCall },
     ['.'] = { 1, RightFieldAccess }, [TokenRightArrow] = { 1, RightFieldAccess },
-    ['?'] = { 1, RightOptional },
+    ['?'] = { 1, RightOptional }, [TokenDoubleDot] = { 1, RightRange },
 
     ['*'] = { 3, RightPostfixOrBinary }, ['/'] = { 3 }, ['%'] = { 3 },
 
@@ -71,6 +71,7 @@ Node* righthand_expression(Node* lefthand, Parser* parser, const unsigned char p
 
             case RightAssignment: check_assignable(lefthand, parser->tokenizer->messages);
             case RightCompare:
+            case RightRange:
             case RightBinary:
                 lefthand = parse_binary_operation(lefthand, operator, parser);
                 break;
@@ -80,24 +81,9 @@ Node* righthand_expression(Node* lefthand, Parser* parser, const unsigned char p
                 lefthand = parse_declaration(lefthand, next(parser->tokenizer), parser);
                 break;
 
-            case RightIndex: {
-                next(parser->tokenizer);
-                Node* const index = expression(parser);
-
-                Node* const offset = new_node((Node) {
-                    .BinaryOperation = {
-                        .id = NodeBinaryOperation,
-                        .type = lefthand->type,
-                        .left = lefthand,
-                        .operator = String("+"),
-                        .right = index,
-                    }
-                });
-
-                lefthand = dereference(offset, stretch(lefthand->trace, expect(parser->tokenizer, ']').trace),
-                                       parser->tokenizer->messages);
+            case RightIndex:
+                lefthand = parse_indexing(lefthand, parser);
                 break;
-            }
 
             case RightCall:
                 lefthand = parse_function_call(lefthand, parser);

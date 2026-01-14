@@ -29,7 +29,7 @@ void comp_StructLiteral(void* void_self, String* line, Compiler* compiler) {
     compile(self->type, line, compiler);
     strf(line, ") {");
 
-    for(size_t i = 0; i < self->field_names.size; i++) {
+    for(size_t i = 0; i < self->field_values.size; i++) {
         strf(line, i ? ", " : " ");
         if(self->field_names.data[i].size) {
             strf(line, ".%.*s = ", PRINT(self->field_names.data[i]));

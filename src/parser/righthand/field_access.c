@@ -1,9 +1,13 @@
 #include "field_access.h"
 
+#include "righthand.h"
 #include "../lefthand/reference.h"
 #include "../type/types.h"
 #include "../statement/scope.h"
 #include "declaration/declaration.h"
+#include "parser/literal/wrapper.h"
+#include "../literal/array.h"
+#include "declaration/variable.h"
 
 Node* parse_field_access(Node* lefthand, Parser* parser) {
     Type* type = lefthand->type;
@@ -14,8 +18,8 @@ Node* parse_field_access(Node* lefthand, Parser* parser) {
     const OpenedType opened = open_type(type, 0);
     StructType* const struct_type = (void*) opened.type;
 
-    String operator_token = next(parser->tokenizer).trace.source;
-    Token field_token = expect(parser->tokenizer, TokenIdentifier);
+    const String operator_token = next(parser->tokenizer).trace.source;
+    const Token field_token = expect(parser->tokenizer, TokenIdentifier);
 
     if(struct_type->id != NodeStructType) {
         push(parser->tokenizer->messages, REPORT_ERR(lefthand->trace,
@@ -37,19 +41,14 @@ Node* parse_field_access(Node* lefthand, Parser* parser) {
         if(child) {
             lefthand->type = make_type_standalone(lefthand->type);
             child->Variable.bound_self_argument = lefthand;
-
             child->type = make_type_standalone(child->type);
 
+            if(global_actions.size) {
+                child->action = child->type->Wrapper.action;
+            }
+
             close_type(opened.actions, 0);
-            return child->type->id == WrapperAuto
-                       ? new_node((Node) {
-                           .Wrapper = {
-                               .id = WrapperSurround,
-                               .action = child->type->Wrapper.action,
-                               .Surround.child = (void*) child,
-                           },
-                       })
-                       : (void*) child;
+            return (void*) child;
         }
 
         push(parser->tokenizer->messages,
@@ -75,4 +74,107 @@ Node* parse_field_access(Node* lefthand, Parser* parser) {
             }),
         }
     });
+}
+
+Node* parse_indexing(Node* lefthand, Parser* parser) {
+    const Trace trace_start = next(parser->tokenizer).trace;
+    Node* const index = expression(parser);
+    const Trace trace = stretch(trace_start, expect(parser->tokenizer, ']').trace);
+
+    const OpenedType opened_index = open_type(index->type, 0);
+    if(opened_index.type->id == NodeStructType
+       && streq(opened_index.type->StructType.parent->identifier.base, String("Range"))) {
+        close_type(opened_index.actions, 0);
+
+        Declaration* const slice_declaration = fetch_slice_declaration(parser);
+
+        StructLiteral* const struct_literal = (void*) new_node((Node) {
+            .StructLiteral = {
+                .id = NodeStructLiteral,
+                .trace = trace,
+                .type = (void*) variable_of(slice_declaration, trace, 0),
+            },
+        });
+
+        TypeVector generics = { 0 };
+        push(&generics, (void*) dereference((void*) lefthand->type, trace, parser->tokenizer->messages));
+        struct_literal->type->Wrapper.action = (Action) { ActionApplyGenerics, generics, slice_declaration };
+
+        Scope* const collector = new_scope(NULL);
+        Node* temp_index = create_temp_variable(index, parser, &collector->children);
+
+        Node* const size_node = new_node((Node) {
+            .BinaryOperation = {
+                .id = NodeBinaryOperation,
+                .left = new_node((Node) {
+                    .BinaryOperation = {
+                        .id = NodeBinaryOperation,
+                        .left = temp_index,
+                        .operator = String("."),
+                        .right = new_node((Node) { .External = { NodeExternal, .data = String("end") } }),
+                    },
+                }),
+                .operator = String("-"),
+                .right = new_node((Node) {
+                    .BinaryOperation = {
+                        .id = NodeBinaryOperation,
+                        .left = temp_index,
+                        .operator = String("."),
+                        .right = new_node((Node) { .External = { NodeExternal, .data = String("start") } }),
+                    },
+                }),
+            },
+        });
+
+        Node* const data_node = new_node((Node) {
+            .BinaryOperation = {
+                .id = NodeBinaryOperation,
+                .left = new_node((Node) {
+                    .Wrapper = { WrapperSurround, .Surround = { lefthand, String("("), String(")") } }
+                }),
+                .operator = String("+"),
+                .right = new_node((Node) {
+                    .BinaryOperation = {
+                        .id = NodeBinaryOperation,
+                        .left = temp_index,
+                        .operator = String("."),
+                        .right = new_node((Node) { .External = { NodeExternal, .data = String("start") } }),
+                    }
+                }),
+            },
+        });
+
+        push(&struct_literal->field_names, String("size"));
+        push(&struct_literal->field_values, size_node);
+        push(&struct_literal->field_names, String("data"));
+        push(&struct_literal->field_values, data_node);
+
+        collector->result_value = (void*) struct_literal;
+        collector->type = struct_literal->type;
+        collector->trace = trace;
+        return (void*) collector;
+    }
+    close_type(opened_index.actions, 0);
+
+    Node* const offset = new_node((Node) {
+        .Wrapper = {
+            .id = WrapperSurround,
+            .type = lefthand->type,
+            .Surround = {
+                .child = new_node((Node) {
+                    .BinaryOperation = {
+                        .id = NodeBinaryOperation,
+                        .type = lefthand->type,
+                        .left = lefthand,
+                        .operator = String("+"),
+                        .right = index,
+                    }
+                }),
+                .prefix = String("("),
+                .postfix = String(")"),
+            },
+        },
+    });
+
+    return dereference(offset, trace, parser->tokenizer->messages);
 }

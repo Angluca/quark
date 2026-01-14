@@ -11,7 +11,8 @@ void compile_identifier(const Identifier identifier, String* line) {
         }
 
         if(identifier.parent_scope && identifier.parent_scope->id == NodeStructType
-           && identifier.parent_declaration->id != NodeVariableDeclaration) {
+           && !(identifier.parent_declaration->id == NodeVariableDeclaration
+                && !(identifier.parent_declaration->type->flags & fType))) {
             const Identifier parent_ident = ((StructType*) (void*) identifier.parent_scope)->parent->identifier;
             compile_identifier(parent_ident, line);
             strf(line, "__");
@@ -21,8 +22,7 @@ void compile_identifier(const Identifier identifier, String* line) {
     // TODO: change `PRINT` macro to `FMT` or `STRFMT`
     strf(line, "%.*s", PRINT(identifier.base));
 
-    if(identifier.parent_declaration && identifier.parent_declaration->generics.base_type_arguments.size
-       && identifier.parent_declaration->generics.type_arguments_stack.size && !identifier.is_external) {
+    if(identifier.parent_declaration->generics.type_arguments_stack.size && !identifier.is_external) {
         stringify_generics(line, last(identifier.parent_declaration->generics.type_arguments_stack),
                            StringifyAlphaNumeric);
     }

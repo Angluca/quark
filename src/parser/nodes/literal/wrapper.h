@@ -43,15 +43,14 @@ typedef struct Wrapper {
 
         struct {
             Type* ref;
-            Type* parent_base_generic;
-            struct GenericReference* replacement_generic;
+            Type* test_against;
+            // struct GenericReference* replacement_generic;
         } Auto;
 
         struct {
             Node* child;
             String prefix;
             String postfix;
-            bool no_parenthesis_wrap : 1;
         } Surround;
     };
 } Wrapper;

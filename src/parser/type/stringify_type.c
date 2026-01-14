@@ -1,4 +1,6 @@
 #include "stringify_type.h"
+
+#include "traverse_type.h"
 #include "types.h"
 
 void stringify_generics(String* string, const TypeVector generics, const unsigned flags) {

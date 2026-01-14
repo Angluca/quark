@@ -15,22 +15,21 @@ IdentifierInfo new_identifier(Token base_identifier, Parser* parser, const unsig
             .parent_scope = last(parser->stack)->parent,
             .is_external = is_external,
         },
-        .value = flags & IdentifierDeclaration ? NULL : find_on_stack(parser->stack, base_identifier.trace),
+        .value = find_on_stack(parser->stack, base_identifier.trace),
         .declaration_scope = last(parser->stack),
         .trace = base_identifier.trace,
     };
 
 compound_start:
-    if(info.value) {
-        apply_type_arguments(info.value, parser);
-    } else if(flags & IdentifierDeclaration) {
+    if(flags & IdentifierDeclaration) {
         info.generics_collection = collect_generics(parser);
+    } else if(info.value) {
+        apply_type_arguments(info.value, parser);
     }
 
     if(!info.value || !info.value->Variable.declaration->const_value
        || info.value->Variable.declaration->const_value->id != NodeStructType
-       || !try(parser->tokenizer, TokenDoubleColon, NULL)
-    ) {
+       || !try(parser->tokenizer, TokenDoubleColon, NULL)) {
         return info;
     }
 

@@ -46,6 +46,15 @@ Node* keyword_sizeof(const Token token, Parser* parser) {
     NodeVector arguments = { 0 };
     push(&arguments, expression(parser));
 
+    static Type usize_type = {
+        .External = {
+            .id = NodeExternal,
+            .flags = fNumeric | fType,
+            .type = &usize_type,
+            .data = String("size_t"),
+        },
+    };
+
     return new_node((Node) {
         .FunctionCall = {
             .id = NodeFunctionCall,
@@ -57,7 +66,7 @@ Node* keyword_sizeof(const Token token, Parser* parser) {
                 }
             }),
             .arguments = arguments,
-            .type = (void*) find_on_stack(parser->stack, (Trace) { String("usize") }),
+            .type = &usize_type,
         }
     });
 }
@@ -129,25 +138,4 @@ Node* keyword_extern(const Token token, Parser* parser) {
     }
 
     return external;
-}
-
-Node* keyword_self(const Token token, Parser* parser) {
-    StructType* structure = (void*) parser->stack.data[parser->stack.size - 2]->parent;
-    if(structure->id != NodeStructType) return NULL;
-
-    VariableDeclaration* const argument_declaration = (void*) new_node((Node) {
-        .VariableDeclaration = {
-            .id = NodeVariableDeclaration,
-            .trace = token.trace,
-            .type = make_type_standalone((void*) structure),
-            .identifier = { .base = String("self") },
-        }
-    });
-    argument_declaration->identifier.parent_declaration = (void*) argument_declaration;
-
-    put(&last(parser->stack)->variables, token.trace.source, (void*) argument_declaration);
-
-    Wrapper* variable = variable_of((void*) argument_declaration, token.trace, fIgnoreStatement);
-    variable->Variable.is_self_literal = true;
-    return (void*) variable;
 }

@@ -1,3 +1,5 @@
+#include <clargs.h>
+
 #include "optional_coalesce.h"
 
 #include "righthand.h"
@@ -9,60 +11,46 @@
 #include "../type/types.h"
 
 Node* parse_optional_coalescing(Node* lefthand, Parser* parser) {
-    static VariableDeclaration optional_struct_declaration = {
-        .id = NodeVariableDeclaration,
-        .identifier = {
-            .base = String("Option"),
-            .parent_declaration = (void*) &optional_struct_declaration,
-            .parent_scope = (void*) &optional_struct_declaration,
-        },
-        .generics = {
-            .base_type_arguments = { .size = 1 },
-        },
-    };
+    static Declaration* optional_declaration = NULL;
 
-    static StructType optional_struct_type = {
-        .id = NodeStructType,
-        .parent = &optional_struct_declaration,
-    };
+    if(!optional_declaration) {
+        optional_declaration = find_on_stack_unwrapped(parser->stack, String("Option"));
+
+        if(!optional_declaration) {
+            // TODO: add guard to Slice<T>, str, and char_literal too
+            panicf("[fatal] Unable to find definition for '\33[35mOption<T>\33[35m'\n");
+        }
+    }
+
+    Type* const optional_type = new_type((Type) {
+        .Wrapper = {
+            .id = WrapperAuto,
+            .action = { ActionApplyGenerics, {}, optional_declaration },
+            .Auto.ref = (void*) optional_declaration->const_value,
+        },
+    });
 
     next(parser->tokenizer);
 
     if(lefthand->flags & fType) {
-        TypeVector action_generics = { 0 };
-        push(&action_generics, (void*) lefthand);
-
-        return (void*) new_type((Type) {
-            .Wrapper = {
-                .id = WrapperAuto,
-                .action = { ActionApplyGenerics, action_generics, (void*) &optional_struct_declaration },
-                .Auto.ref = (void*) &optional_struct_type,
-            },
-        });
+        push(&optional_type->Wrapper.action.generics, (void*) lefthand);
+        return (void*) optional_type;
     }
 
     const RighthandOperator operator = global_righthand_operator_table[parser->tokenizer->current.type];
     if(operator.precedence > 1) return NULL;
 
     const OpenedType lefthand_optional = open_type(lefthand->type, 0);
-    close_type(lefthand_optional.actions, 0);
+
     if(lefthand_optional.type->id != NodeStructType ||
        !streq(lefthand_optional.type->StructType.parent->identifier.base, String("Option"))) {
+        close_type(lefthand_optional.actions, 0);
         return NULL;
     }
 
-    unsigned lefthand_variable_id;
-    Node* const lefthand_variable = create_temp_variable(lefthand, parser, &lefthand_variable_id);
-
-    Node* const some_branch_value = righthand_expression(
-        new_node((Node) {
-            .BinaryOperation = {
-                .id = NodeBinaryOperation,
-                .left = lefthand_variable,
-                .operator = String("."),
-                .right = new_node((Node) { .External = { NodeExternal, .data = String("value") } }),
-            },
-        }), parser, 2);
+    Type* const lefthand_value_type =
+            last(lefthand_optional.type->StructType.parent->generics.type_arguments_stack).data[0];
+    close_type(lefthand_optional.actions, 0);
 
     Scope* operation_step_collection = (void*) new_node((Node) {
         .Scope = {
@@ -71,7 +59,20 @@ Node* parse_optional_coalescing(Node* lefthand, Parser* parser) {
             .wrap_with_brackets = true,
         }
     });
-    // push(&operation_step_collection->children, lefthand_variable);
+
+    Node* const lefthand_temp_value = create_temp_variable(lefthand, parser, &operation_step_collection->children);
+
+    Node* const lefthand_optional_value = righthand_expression(
+        new_node((Node) {
+            .BinaryOperation = {
+                .id = NodeBinaryOperation,
+                .type = lefthand_value_type,
+                .trace = lefthand->trace,
+                .left = lefthand_temp_value,
+                .operator = String("."),
+                .right = new_node((Node) { .External = { NodeExternal, .data = String("value") } }),
+            },
+        }), parser, 2);
 
     Node* const some_branch_if_statement = new_node((Node) {
         .ControlStatement = {
@@ -80,68 +81,56 @@ Node* parse_optional_coalescing(Node* lefthand, Parser* parser) {
             .body = new_scope(NULL),
         },
     });
-    push(&operation_step_collection->children, some_branch_if_statement);
 
     Node* const if_cond = new_node((Node) {
         .BinaryOperation = {
             .id = NodeBinaryOperation,
-            .left = lefthand_variable,
+            .left = lefthand_temp_value,
             .operator = String("."),
             .right = new_node((Node) { .External = { NodeExternal, .data = String("some") } }),
         }
     });
     push(&some_branch_if_statement->ControlStatement.conditions, if_cond);
 
-    const OpenedType opened_optional_value = open_type(some_branch_value->type, 0);
+    const OpenedType opened_optional_value = open_type(lefthand_optional_value->type, 0);
     const bool no_resulting_value = opened_optional_value.type->id == NodeExternal
                                     && streq(opened_optional_value.type->External.data, String("void"));
     close_type(opened_optional_value.actions, 0);
 
     if(no_resulting_value) {
-        push(&some_branch_if_statement->ControlStatement.body->children, some_branch_value);
+        push(&operation_step_collection->children, some_branch_if_statement);
+        push(&some_branch_if_statement->ControlStatement.body->children, lefthand_optional_value);
         return (void*) operation_step_collection;
     }
 
     static Node false_node = { .External = { NodeExternal, .data = String("false") } };
     static Node true_node = { .External = { NodeExternal, .data = String("true") } };
 
-    TypeVector optional_generics = { 0 };
-    push(&optional_generics, some_branch_value->type);
+    push(&optional_type->Wrapper.action.generics, lefthand_optional_value->type);
 
     Node* const operation_result_value = new_node((Node) {
         .StructLiteral = {
             .id = NodeStructLiteral,
-            .type = new_type((Type) {
-                .Wrapper = {
-                    .id = WrapperAuto,
-                    .action = { ActionApplyGenerics, optional_generics, (void*) &optional_struct_declaration },
-                    .Auto.ref = (void*) &optional_struct_type,
-                },
-            }),
+            .type = optional_type,
         },
     });
     push(&operation_result_value->StructLiteral.field_names, String("some"));
     push(&operation_result_value->StructLiteral.field_values, &false_node);
 
-    unsigned operation_result_id;
-    Node* const operation_result = create_temp_variable(operation_result_value, parser, &operation_result_id);
+    Node* const operation_temp_result = create_temp_variable(operation_result_value, parser,
+                                                             &operation_step_collection->children);
+    push(&operation_step_collection->children, some_branch_if_statement);
 
     Node* const some_branch_result_optional = new_node((Node) {
         .StructLiteral = {
             .id = NodeStructLiteral,
-            .type = new_type((Type) {
-                .Wrapper = {
-                    .id = WrapperAuto,
-                    .action = { ActionApplyGenerics, optional_generics, (void*) &optional_struct_declaration },
-                    .Auto.ref = (void*) &optional_struct_type,
-                },
-            }),
+            .type = optional_type,
         },
     });
     push(&some_branch_result_optional->StructLiteral.field_names, String("some"));
     push(&some_branch_result_optional->StructLiteral.field_values, &true_node);
     push(&some_branch_result_optional->StructLiteral.field_names, String("value"));
-    push(&some_branch_result_optional->StructLiteral.field_values, some_branch_value);
+    push(&some_branch_result_optional->StructLiteral.field_values, lefthand_optional_value);
 
     Node* const some_branch_assignment = new_node((Node) {
         .StatementWrapper = {
@@ -149,7 +138,7 @@ Node* parse_optional_coalescing(Node* lefthand, Parser* parser) {
             .expression = new_node((Node) {
                 .BinaryOperation = {
                     .id = NodeBinaryOperation,
-                    .left = operation_result,
+                    .left = operation_temp_result,
                     .operator = String("="),
                     .right = some_branch_result_optional,
                 },
@@ -158,7 +147,7 @@ Node* parse_optional_coalescing(Node* lefthand, Parser* parser) {
     });
     push(&some_branch_if_statement->ControlStatement.body->children, some_branch_assignment);
 
-    operation_step_collection->result_value = operation_result;
-    operation_step_collection->type = operation_result->type;
+    operation_step_collection->result_value = operation_temp_result;
+    operation_step_collection->type = operation_temp_result->type;
     return (void*) operation_step_collection;
 }

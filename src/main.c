@@ -8,6 +8,9 @@
 #include "parser/type/types.h"
 #include "parser/keywords.h"
 
+#define QUARK_VERSION "0.3.1a"
+#define QUARK_STABILITY "untested"
+
 typedef Vector(char*) CStringVector;
 
 FunctionDeclaration* entry_declaration() {
@@ -23,6 +26,7 @@ FunctionDeclaration* entry_declaration() {
             .body = new_scope(NULL),
         }
     });
+    declaration->identifier.parent_declaration = (void*) declaration;
     function_type->declaration = declaration;
 
     return declaration;
@@ -32,9 +36,10 @@ const char* help_message =
         " \33[1musage:\33[0m %s [input_files,] [flags,]\n"
         "        %s main.qk -o main.c\n"
         " \33[1mflags:\33[0m\n"
-        "   -h    <no arguments>     prints help/usage menu\n"
-        "   -o    /path/to/output.c  specifies compiled output path\n"
-        "   -l    /path/to/library/  specifies the parent directory of `lib::std`\n";
+        "   -h    <no arguments>      prints help/usage menu\n"
+        "   -v    <no arguments>      prints the current version of Quark\n"
+        "   -o    /path/to/output.c   specifies compiled output path\n"
+        "   -l    /path/to/library/   specifies the parent directory of `lib::std`\n";
 
 int main(int argc, char** argv) {
     char* name = clname(argc, argv);
@@ -47,6 +52,9 @@ int main(int argc, char** argv) {
         switch(flag) {
             case 'h':
                 printf(help_message, name, name);
+                return 0;
+            case 'v':
+                puts("Quark Compiler version " QUARK_VERSION " \33[90m" QUARK_STABILITY "\33[0m");
                 return 0;
             case -1: push(&input_files, clarg());
                 break;
@@ -114,9 +122,9 @@ int main(int argc, char** argv) {
     }
 
     for(size_t i = 0; i < compiler.sections.size; i++) {
-        if(i) fprintf(out, "\n");
         for(size_t j = 0; j < compiler.sections.data[i].lines.size; j++) {
             fprintf(out, "%.*s\n", PRINT(compiler.sections.data[i].lines.data[j]));
         }
+        if(i) fprintf(out, "\n");
     }
 }

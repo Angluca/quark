@@ -4,7 +4,7 @@
 unsigned char const tokenizer_double_characters[128] = {
     [':'] = TokenDoubleColon, ['+'] = TokenDoublePlus, ['-'] = TokenDoubleMinus,
     ['<'] = TokenDoubleLess, ['>'] = TokenDoubleGreater, ['='] = TokenDoubleEqual,
-    ['&'] = TokenDoubleAnd, ['|'] = TokenDoubleOr,
+    ['&'] = TokenDoubleAnd, ['|'] = TokenDoubleOr, ['.'] = TokenDoubleDot,
 };
 
 unsigned char const tokenizer_equal_characters[128] = {

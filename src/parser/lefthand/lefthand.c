@@ -19,9 +19,6 @@ Node* lefthand_expression(Parser* parser) {
         case TokenNumber: return (void*) numeric_literal_from_token(token);
 
         case TokenIdentifier: {
-            bool use_existing_info = false;
-            IdentifierInfo info = {};
-
             if(!token.identifier.searched_keyword) {
                 Keyword* const keyword_info = get(global_keyword_table, token.trace.source);
                 if(keyword_info) {
@@ -30,22 +27,11 @@ Node* lefthand_expression(Parser* parser) {
                 }
             }
 
-            if(token.identifier.is_keyword) {
-                switch(token.identifier.keyword.specific_action) {
-                    case KeywordActionSelf:
-                        info = new_identifier(token, parser, 0);
-                        use_existing_info = true;
-                        // TODO: check if parsing arguments (add `ParsingArguments` flag to parser)
-                        if(info.value || parser->stack.size < 2) break;
-
-                    default:
-                        return token.identifier.keyword.consumer(token, parser);
-                }
+            if(token.identifier.is_keyword && !(token.identifier.keyword.specific_action & KeywordActionStatement)) {
+                return token.identifier.keyword.consumer(token, parser);
             }
 
-            if(!use_existing_info) {
-                info = new_identifier(token, parser, 0);
-            }
+            const IdentifierInfo info = new_identifier(token, parser, 0);
 
             if(!info.value) {
                 return (void*) new_type((Type) {
@@ -67,7 +53,15 @@ Node* lefthand_expression(Parser* parser) {
             // TODO: wrap in surround and remove parenthesis in compiler to remove redundant parenthesis
             Node* expr = expression(parser);
             expect(parser->tokenizer, ')');
-            return expr;
+            return new_node((Node) {
+                .Wrapper = {
+                    .id = WrapperSurround,
+                    .trace = expr->trace,
+                    .type = expr->type,
+                    .flags = expr->flags,
+                    .Surround = { expr, String("("), String(")") },
+                },
+            });
         }
 
         case TokenString: return string_literal(token, parser);

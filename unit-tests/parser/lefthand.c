@@ -17,14 +17,14 @@ int test_lefthand() {
 
         Wrapper* reference = (void*) lefthand_expression(&parser);
         assert_eq(reference->id, WrapperSurround);
-        assert_eq(streq(reference->Surround.prefix, String("&")), true);
+        assert_eq(streq(reference->Surround.prefix, String("(&")), true);
         assert_eq(reference->type->id, NodePointerType);
 
         unbox(statement(&parser));
 
         Wrapper* dereference = (void*) lefthand_expression(&parser);
         assert_eq(dereference->id, WrapperSurround);
-        assert_eq(streq(dereference->Surround.prefix, String("*")), true);
+        assert_eq(streq(dereference->Surround.prefix, String("(*")), true);
         assert_eq(dereference->type->id != NodePointerType, true);
 
         unbox(lefthand_expression(&parser));
@@ -65,8 +65,8 @@ int test_lefthand() {
         assert_eq(operation->id, NodeBinaryOperation);
         assert_eq(streq(operation->operator, String("*")), true);
 
-        assert_eq(operation->left->id, NodeBinaryOperation);
-        assert_eq(streq(operation->left->BinaryOperation.operator, String("+")), true);
+        assert_eq(operation->left->id, WrapperSurround);
+        assert_eq(operation->left->Wrapper.Surround.child->id, NodeBinaryOperation);
 
         assert_eq(messages.size, 0);
         assert_eq(tokenizer.current.type, 0);
