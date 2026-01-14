@@ -67,20 +67,6 @@ Node* lefthand_expression(Parser* parser) {
             Node* expr = expression(parser);
             expect(parser->tokenizer, ')');
 
-            if(expr->flags & fType) {
-                Node* value = righthand_expression(lefthand_expression(parser), parser, 2);
-                clash_types((void*) expr, value->type, expr->trace, parser->tokenizer->messages, 0);
-
-                return new_node((Node) {
-                    .Cast = {
-                        .id = NodeCast,
-                        .type = (void*) expr,
-                        .trace = expr->trace,
-                        .value = value,
-                    },
-                });
-            }
-
             return new_node((Node) {
                 .Wrapper = {
                     .id = WrapperSurround,
