@@ -156,9 +156,10 @@ int test_righthand() {
         assert_eq(deref->id, WrapperSurround);
         assert_eq(streq(deref->Surround.prefix, String("(*")), true);
 
-        assert_eq(deref->Surround.child->id, NodeBinaryOperation);
-        assert_eq(deref->Surround.child->BinaryOperation.right->id, NodeNumericLiteral);
-        assert_eq(deref->Surround.child->BinaryOperation.right->NumericLiteral.value, 42);
+        assert_eq(deref->Surround.child->id, WrapperSurround);
+        assert_eq(deref->Surround.child->Wrapper.Surround.child->id, NodeBinaryOperation);
+        assert_eq(deref->Surround.child->Wrapper.Surround.child->BinaryOperation.right->id, NodeNumericLiteral);
+        assert_eq(deref->Surround.child->Wrapper.Surround.child->BinaryOperation.right->NumericLiteral.value, 42);
 
         assert_eq(messages.size, 0);
         assert_eq(tokenizer.current.type, 0);

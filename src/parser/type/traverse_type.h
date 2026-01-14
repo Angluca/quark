@@ -1,0 +1,9 @@
+#ifndef TRAVERSE_TYPES_H
+#define TRAVERSE_TYPES_H
+
+#include "../parser.h"
+
+int traverse_type(Type* type, Type* follower, int (*acceptor)(Type*, Type*, void*), void* accumulator,
+                  unsigned flags);
+
+#endif

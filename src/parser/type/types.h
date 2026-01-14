@@ -40,7 +40,4 @@ TypeVector find_last_generic_action(ActionVector actions, Declaration* declarati
 
 Type* make_type_standalone(Type* type);
 
-int traverse_type(Type* type, Type* follower, int (*acceptor)(Type*, Type*, void*), void* accumulator,
-                  unsigned flags);
-
 #endif

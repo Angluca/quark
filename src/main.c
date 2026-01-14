@@ -8,6 +8,9 @@
 #include "parser/type/types.h"
 #include "parser/keywords.h"
 
+#define QUARK_VERSION "0.3.1a"
+#define QUARK_STABILITY "untested"
+
 typedef Vector(char*) CStringVector;
 
 FunctionDeclaration* entry_declaration() {
@@ -34,6 +37,7 @@ const char* help_message =
         "        %s main.qk -o main.c\n"
         " \33[1mflags:\33[0m\n"
         "   -h    <no arguments>      prints help/usage menu\n"
+        "   -v    <no arguments>      prints the current version of Quark\n"
         "   -o    /path/to/output.c   specifies compiled output path\n"
         "   -l    /path/to/library/   specifies the parent directory of `lib::std`\n";
 
@@ -48,6 +52,9 @@ int main(int argc, char** argv) {
         switch(flag) {
             case 'h':
                 printf(help_message, name, name);
+                return 0;
+            case 'v':
+                puts("Quark Compiler version " QUARK_VERSION " \33[90m" QUARK_STABILITY "\33[0m");
                 return 0;
             case -1: push(&input_files, clarg());
                 break;

@@ -43,19 +43,12 @@ Node* parse_field_access(Node* lefthand, Parser* parser) {
             child->Variable.bound_self_argument = lefthand;
             child->type = make_type_standalone(child->type);
 
+            if(global_actions.size) {
+                child->action = child->type->Wrapper.action;
+            }
+
             close_type(opened.actions, 0);
-            return child->type->id == WrapperAuto
-                       ? new_node((Node) {
-                           .Wrapper = {
-                               .id = WrapperSurround,
-                               .flags = child->flags,
-                               .trace = child->trace,
-                               .type = child->type,
-                               .action = child->type->Wrapper.action,
-                               .Surround.child = (void*) child,
-                           },
-                       })
-                       : (void*) child;
+            return (void*) child;
         }
 
         push(parser->tokenizer->messages,
@@ -164,13 +157,23 @@ Node* parse_indexing(Node* lefthand, Parser* parser) {
     close_type(opened_index.actions, 0);
 
     Node* const offset = new_node((Node) {
-        .BinaryOperation = {
-            .id = NodeBinaryOperation,
+        .Wrapper = {
+            .id = WrapperSurround,
             .type = lefthand->type,
-            .left = lefthand,
-            .operator = String("+"),
-            .right = index,
-        }
+            .Surround = {
+                .child = new_node((Node) {
+                    .BinaryOperation = {
+                        .id = NodeBinaryOperation,
+                        .type = lefthand->type,
+                        .left = lefthand,
+                        .operator = String("+"),
+                        .right = index,
+                    }
+                }),
+                .prefix = String("("),
+                .postfix = String(")"),
+            },
+        },
     });
 
     return dereference(offset, trace, parser->tokenizer->messages);

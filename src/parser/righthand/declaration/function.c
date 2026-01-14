@@ -9,6 +9,7 @@
 #include "../../literal/wrapper.h"
 #include "parser/lefthand/lefthand.h"
 #include "parser/lefthand/reference.h"
+#include "parser/type/traverse_type.h"
 
 static int recycle_missing_generics(Type* missing, Type* ignore, void* void_parser) {
     (void) ignore;

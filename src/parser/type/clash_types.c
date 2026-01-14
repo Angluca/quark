@@ -1,14 +1,28 @@
 #include "clash_types.h"
 #include "types.h"
 #include "stringify_type.h"
+#include "traverse_type.h"
 
-static int circular_acceptor(Type* type, Type* follower, void* compare) {
+static int circular_acceptor(Type* const type, Type* follower, void* const compare) {
     (void) follower;
     return 2 * (type == compare);
 }
 
+static void assign_auto_ref(Wrapper* wrapper, Type* follower) {
+    wrapper->Auto.ref = make_type_standalone(follower);
 
-static int assign_wrapper(Wrapper* wrapper, Type* follower, ClashAccumulator* accumulator) {
+    if(follower->id == WrapperAuto) {
+        if((wrapper->flags | follower->flags) & fNumeric) {
+            wrapper->flags |= fNumeric;
+            follower->flags |= fNumeric;
+        }
+        if(wrapper->Auto.test_against) follower->Wrapper.Auto.test_against = wrapper->Auto.test_against;
+    }
+}
+
+static int clash_acceptor(Type* type, Type* follower, void* void_accumulator);
+
+static int clash_autos(Wrapper* wrapper, Type* follower, ClashAccumulator* accumulator) {
 #ifdef EBUG
     printf("assigning:\t \33[3%dm%-24.*s \33[3%dm%.*s\33[0m\n",
            (int) ((size_t) wrapper->trace.source.data / 16) % 6 + 1,
@@ -17,12 +31,47 @@ static int assign_wrapper(Wrapper* wrapper, Type* follower, ClashAccumulator* ac
            (int) follower->trace.source.size, follower->trace.source.data);
 #endif
 
-    if(wrapper->flags & fNumeric && !(follower->flags & fNumeric) && follower->id != WrapperAuto) {
-        return TestMismatch;
-    }
-
     if((void*) wrapper == follower) {
         return 1;
+    }
+
+    if(wrapper->Auto.test_against) {
+        const OpenedType test_against = open_type(wrapper->Auto.test_against, 0);
+        OpenedType follower_test_against = { 0 };
+
+        if(test_against.type == follower) {
+            close_type(test_against.actions, 0);
+            close_type(follower_test_against.actions, 0);
+            return 1;
+        }
+
+        if(follower->id == WrapperAuto && follower->Wrapper.Auto.test_against) {
+            follower_test_against = open_type(follower->Wrapper.Auto.test_against, 0);
+            follower = follower_test_against.type;
+
+            if(test_against.type == follower) {
+                close_type(test_against.actions, 0);
+                close_type(follower_test_against.actions, 0);
+                return 1;
+            }
+        }
+
+        const int clash_error = clash_types(test_against.type, follower, accumulator->trace, accumulator->messages,
+                                            ClashPassive | accumulator->flags);
+        if(clash_error) {
+            close_type(test_against.actions, 0);
+            close_type(follower_test_against.actions, 0);
+            return clash_error + 1;
+        }
+
+        if(!(accumulator->flags & ClashPassive)) assign_auto_ref(wrapper, follower);
+        close_type(test_against.actions, 0);
+        close_type(follower_test_against.actions, 0);
+        return 1;
+    }
+
+    if(wrapper->flags & fNumeric && !(follower->flags & fNumeric) && follower->id != WrapperAuto) {
+        return TestMismatch;
     }
 
     if(traverse_type((void*) wrapper, NULL, &circular_acceptor, follower, TraverseGenerics & TraverseIntermediate) ||
@@ -30,44 +79,46 @@ static int assign_wrapper(Wrapper* wrapper, Type* follower, ClashAccumulator* ac
         return TestCircular;
     }
 
-    if(wrapper->Auto.parent_base_generic) {
-        const int result = clash_types(wrapper->Auto.parent_base_generic, follower, accumulator->trace,
-                                       accumulator->messages,
-                                       ClashPassive | accumulator->flags);
-        if(result) return result + 1;
-    }
+    // if(wrapper->Auto.parent_base_generic) {
+    //     const int result = clash_types(wrapper->Auto.parent_base_generic, follower, accumulator->trace,
+    //                                    accumulator->messages,
+    //                                    ClashPassive | accumulator->flags);
+    //     if(result) return result + 1;
+    // }
 
-    if(!(accumulator->flags & ClashPassive)) {
-        if(follower->id == WrapperAuto && follower->Wrapper.Auto.replacement_generic) {
-            if(traverse_type(follower, NULL, (void*) &circular_acceptor, wrapper->Auto.parent_base_generic,
-                             TraverseGenerics & TraverseIntermediate)) {
-                wrapper->Auto.replacement_generic = follower->Wrapper.Auto.replacement_generic;
-                return 1;
-            }
+    if(!(accumulator->flags & ClashPassive)) assign_auto_ref(wrapper, follower);
 
-            const OpenedType anchor = open_type((void*) follower->Wrapper.Auto.replacement_generic, 0);
-            wrapper->Auto.ref = make_type_standalone(anchor.type);
-            close_type(anchor.actions, 0);
-        } else {
-            wrapper->Auto.ref = make_type_standalone(follower);
-        }
-
-        if(wrapper->flags & fNumeric && !(follower->flags & fNumeric)) {
-            follower->flags = wrapper->flags;
-        } else {
-            wrapper->flags = follower->flags;
-        }
-
-        if(follower->id == WrapperAuto) {
-            if(wrapper->Auto.parent_base_generic) {
-                follower->Wrapper.Auto.parent_base_generic = wrapper->Auto.parent_base_generic;
-            }
-
-            if(wrapper->Auto.replacement_generic) {
-                follower->Wrapper.Auto.replacement_generic = wrapper->Auto.replacement_generic;
-            }
-        }
-    }
+    // if(!(accumulator->flags & ClashPassive)) {
+    //     if(follower->id == WrapperAuto && follower->Wrapper.Auto.replacement_generic) {
+    //         if(traverse_type(follower, NULL, (void*) &circular_acceptor, wrapper->Auto.parent_base_generic,
+    //                          TraverseGenerics & TraverseIntermediate)) {
+    //             wrapper->Auto.replacement_generic = follower->Wrapper.Auto.replacement_generic;
+    //             return 1;
+    //         }
+    //
+    //         const OpenedType anchor = open_type((void*) follower->Wrapper.Auto.replacement_generic, 0);
+    //         wrapper->Auto.ref = make_type_standalone(anchor.type);
+    //         close_type(anchor.actions, 0);
+    //     } else {
+    //         wrapper->Auto.ref = make_type_standalone(follower);
+    //     }
+    //
+    //     if(wrapper->flags & fNumeric && !(follower->flags & fNumeric)) {
+    //         follower->flags = wrapper->flags;
+    //     } else {
+    //         wrapper->flags = follower->flags;
+    //     }
+    //
+    //     if(follower->id == WrapperAuto) {
+    //         if(wrapper->Auto.parent_base_generic) {
+    //             follower->Wrapper.Auto.parent_base_generic = wrapper->Auto.parent_base_generic;
+    //         }
+    //
+    //         if(wrapper->Auto.replacement_generic) {
+    //             follower->Wrapper.Auto.replacement_generic = wrapper->Auto.replacement_generic;
+    //         }
+    //     }
+    // }
 
     return 1;
 }
@@ -81,30 +132,31 @@ static int clash_acceptor(Type* type, Type* follower, void* void_accumulator) {
 
     ClashAccumulator* const accumulator = void_accumulator;
 
-    if(type->id == WrapperAuto && !(type->Wrapper.Auto.replacement_generic && follower->id == WrapperAuto)) {
-        return assign_wrapper((void*) type, follower, accumulator);
+    if(follower->id == WrapperAuto && !(type->id == WrapperAuto && type->Wrapper.Auto.test_against)) {
+        return clash_autos((void*) follower, type, accumulator);
     }
 
-    if(follower->id == WrapperAuto) {
-        return assign_wrapper((void*) follower, type, accumulator);
+    if(type->id == WrapperAuto) {
+        return clash_autos((void*) type, follower, accumulator);
     }
 
-    if(type->id == follower->id) switch(type->id) {
-        case NodeExternal:
-            if(streq(type->External.data, follower->External.data)) {
-                return 1;
-            }
-            break;
+    if(type->id == follower->id)
+        switch(type->id) {
+            case NodeExternal:
+                if(streq(type->External.data, follower->External.data)) {
+                    return 1;
+                }
+                break;
 
-        default:
-            return 0;
-    }
+            default:
+                return 0;
+        }
 
     if(type->flags & follower->flags & fNumeric) return 1;
     return TestMismatch;
 }
 
-int clash_types(Type* a, Type* b, Trace trace, MessageVector* messages, unsigned flags) {
+int clash_types(Type* a, Type* b, const Trace trace, MessageVector* messages, const unsigned flags) {
     ClashAccumulator accumulator = { trace, messages, flags };
     const int result = traverse_type(a, b, &clash_acceptor, &accumulator, 0);
 
