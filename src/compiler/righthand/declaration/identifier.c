@@ -47,6 +47,12 @@ void compile_identifier(const Identifier identifier, String* line) {
             compile_identifier(parent_ident, &result);
             strf(&result, "__");
         }
+
+        if(identifier.reference_structure) {
+            const Identifier parent_ident = identifier.reference_structure->parent->identifier;
+            compile_identifier(parent_ident, &result);
+            strf(&result, "__");
+        }
     }
 
     // TODO: change `PRINT` macro to `FMT` or `STRFMT`

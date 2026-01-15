@@ -20,6 +20,8 @@ IdentifierInfo new_identifier(Token base_identifier, Parser* parser, const unsig
         .trace = base_identifier.trace,
     };
 
+    Scope* const initial_declaration_scope = info.declaration_scope;
+
 compound_start:
     if(flags & IdentifierDeclaration) {
         info.generics_collection = collect_generics(parser);
@@ -30,6 +32,25 @@ compound_start:
     if(!info.value || !info.value->Variable.declaration->const_value
        || info.value->Variable.declaration->const_value->id != NodeStructType
        || !try(parser->tokenizer, TokenDoubleColon, NULL)) {
+        if(initial_declaration_scope->parent->id == NodeStructType
+           && initial_declaration_scope != info.declaration_scope) {
+            info.identifier.reference_structure = (void*) info.declaration_scope->parent;
+
+            StructType* const wrapped_structure = (void*) initial_declaration_scope->parent;
+            String const reference_identifier = info.identifier.reference_structure->parent->identifier.base;
+            Scope* reference_declarations;
+
+            if(!((reference_declarations = get(wrapped_structure->reference_structures, reference_identifier)))) {
+                Scope scope = { .id = NodeScope };
+
+                put(&wrapped_structure->reference_structures, reference_identifier, scope);
+                reference_declarations = get(wrapped_structure->reference_structures, reference_identifier);
+                scope.parent = (void*) reference_declarations;
+            }
+
+            info.declaration_scope = reference_declarations;
+        }
+
         return info;
     }
 

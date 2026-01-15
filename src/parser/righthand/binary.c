@@ -1,6 +1,7 @@
 #include "binary.h"
 
 #include "clargs.h"
+#include "function_call.h"
 #include "righthand.h"
 #include "../lefthand/lefthand.h"
 #include "../lefthand/reference.h"
@@ -23,12 +24,19 @@ Node* try_binary_postfix(Node* lefthand, Parser* parser) {
 Node* parse_binary_operation(Node* lefthand, const RighthandOperator operator, Parser* parser) {
     const Token operator_token = next(parser->tokenizer);
     Node* righthand = righthand_expression(lefthand_expression(parser), parser, operator.precedence);
+    const Trace trace = stretch(lefthand->trace, righthand->trace);
+
+    char* override_name;
+    if((override_name = global_righthand_override_table[operator_token.type])) {
+        Node* override = operator_override(lefthand->type, lefthand, righthand,
+                                                  (String) { strlen(override_name), 0, override_name }, trace, parser);
+        if(override) return override;
+    }
 
     clash_types(lefthand->type, righthand->type, stretch(lefthand->trace, righthand->trace),
                 parser->tokenizer->messages, 0);
 
     Type* type = lefthand->type;
-    const Trace trace = stretch(lefthand->trace, righthand->trace);
 
     switch(operator.type) {
         case RightCompare: {

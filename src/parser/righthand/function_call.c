@@ -6,14 +6,42 @@
 #include "../lefthand/reference.h"
 #include "../type/clash_types.h"
 #include "declaration/declaration.h"
+#include "parser/literal/wrapper.h"
+#include "parser/statement/scope.h"
 
-Node* parse_function_call(Node* function, Parser* parser) {
-    next(parser->tokenizer);
+Declaration* fetch_operator_override(Type* type, const String override) {
+    const OpenedType open = open_type(type, 0);
+    close_type(open.actions, 0);
+    if(open.type->id != NodeStructType) return NULL;
 
+    Scope* const overrides_scope = get(open.type->StructType.reference_structures, String("Operator"));
+    if(!overrides_scope) return NULL;
+
+    return find_in_scope_unwrapped(*overrides_scope, override);
+}
+
+Node* operator_override(Type* type, Node* self, Node* argument, const String override, const Trace trace,
+                        Parser* parser) {
+    Declaration* const operator_override = fetch_operator_override(type, override);
+    if(!operator_override) return NULL;
+
+    NodeVector arguments = { 0 };
+    push(&arguments, argument);
+
+    Wrapper* override_variable = variable_of(operator_override, trace, 0);
+    OpenedType const opened_lefthand = open_type(type, 0);
+
+    override_variable->Variable.bound_self_argument = self;
+    override_variable->type = make_type_standalone(override_variable->type);
+    if(global_actions.size) override_variable->action = override_variable->type->Wrapper.action;
+
+    close_type(opened_lefthand.actions, 0);
+    return call_function((void*) override_variable, arguments, parser);
+}
+
+Node* call_function(Node* function, NodeVector arguments, Parser* const parser) {
     const OpenedType opened_function_type = open_type(function->type, 0);
     FunctionType* const function_type = (void*) opened_function_type.type;
-
-    NodeVector arguments = collect_until(parser, &expression, ',', ')');
 
     if(function_type->id != NodeFunctionType) {
         push(parser->tokenizer->messages, REPORT_ERR(function->trace, String("calling a non-function value")));
@@ -67,4 +95,12 @@ Node* parse_function_call(Node* function, Parser* parser) {
             .arguments = arguments,
         }
     });
+}
+
+Node* parse_function_call(Node* function, Parser* parser) {
+    next(parser->tokenizer);
+
+    NodeVector arguments = collect_until(parser, &expression, ',', ')');
+
+    return call_function(function, arguments, parser);
 }

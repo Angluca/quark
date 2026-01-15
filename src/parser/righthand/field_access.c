@@ -1,5 +1,6 @@
 #include "field_access.h"
 
+#include "function_call.h"
 #include "righthand.h"
 #include "../lefthand/reference.h"
 #include "../type/types.h"
@@ -174,6 +175,9 @@ Node* parse_indexing(Node* lefthand, Parser* parser) {
         return (void*) collector;
     }
     close_type(opened_index.actions, 0);
+
+    Node* const override = operator_override(lefthand->type, lefthand, index, String("index"), index->trace, parser);
+    if(override) return override;
 
     Node* const offset = new_node((Node) {
         .Wrapper = {
