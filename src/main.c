@@ -9,7 +9,7 @@
 #include "parser/keywords.h"
 #include "compiler/righthand/declaration/identifier.h"
 
-#define QUARK_VERSION "0.4.0a"
+#define QUARK_VERSION "0.4.0b"
 #define QUARK_STABILITY "untested"
 
 typedef Vector(char*) CStringVector;

@@ -1,5 +1,6 @@
 T* extern malloc<T>(usize size);
 T* extern realloc<T>(T* ptr, usize size);
+void extern free<T>(T* ptr);
 
 struct Vec<T> {
 	T* data;
