@@ -9,10 +9,8 @@
 #include "parser/keywords.h"
 #include "compiler/righthand/declaration/identifier.h"
 
-#define QUARK_VERSION "0.4.0b"
+#define QUARK_VERSION "0.4.1"
 #define QUARK_STABILITY "untested"
-
-typedef Vector(char*) CStringVector;
 
 FunctionDeclaration* entry_declaration() {
     FunctionType* function_type = (void*) new_type((Type) { NodeFunctionType });
@@ -66,7 +64,7 @@ int main(int argc, char** argv) {
                 output_file = clarg();
                 break;
             case 'l':
-                global_library_path = clarg();
+                push(&global_library_paths, clarg());
                 break;
             case 'i':
                 push(&include_paths, clarg());
@@ -74,6 +72,8 @@ int main(int argc, char** argv) {
             default: panicf("unknown flag '-%c'\n hint: %s -h\n", flag, name);
         }
     }
+
+    push(&global_library_paths, ".");
 
     push(&include_paths, "stdint.h");
     push(&include_paths, "stdio.h");
