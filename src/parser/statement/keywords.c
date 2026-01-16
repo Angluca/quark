@@ -7,39 +7,46 @@
 #include "../type/clash_types.h"
 #include "../type/types.h"
 
-char* global_library_path = ".";
+CStringVector global_library_paths = { 0 };
 
 // TODO: (organizational) move some of these functions out of this file
 
 Node* keyword_import(const Token token, Parser* parser) {
-    String import_path = strf(0, global_library_path);
+    String sub_path = { 0 };
     Trace full_trace = token.trace;
 
     do {
         const Trace section = expect(parser->tokenizer, TokenIdentifier).trace;
-        strf(&import_path, "/%.*s", PRINT(section.source));
+        strf(&sub_path, "/%.*s", PRINT(section.source));
         full_trace = stretch(full_trace, section);
     } while(try(parser->tokenizer, TokenDoubleColon, NULL));
     expect(parser->tokenizer, ';');
 
-    strf(&import_path, ".qk");
-    push(&import_path, '\0');
+    strf(&sub_path, ".qk");
 
-    char* input_content = fs_readfile(import_path.data);
-    if(!input_content) {
-        push(parser->tokenizer->messages,
-             REPORT_ERR(full_trace, strf(0, "unable to open or read '%.*s'", PRINT(import_path))));
-        return new_node((Node) { NodeNone });
+    String import_path = { 0 };
+    for(size_t i = 0; i < global_library_paths.size; i++) {
+        strf(&import_path, "%s%.*s%c", global_library_paths.data[i], PRINT(sub_path), 0);
+        char* input_content = fs_readfile(import_path.data);
+
+        if(!input_content) {
+            import_path.size = 0;
+            continue;
+        }
+
+        Tokenizer import_tokenizer = new_tokenizer(import_path.data, input_content, parser->tokenizer->messages);
+        Tokenizer* const tokenizer = parser->tokenizer;
+        parser->tokenizer = &import_tokenizer;
+
+        Scope* scope = new_scope(NULL);
+        scope->children = collect_until(parser, &statement, 0, 0);
+        parser->tokenizer = tokenizer;
+        return (void*) scope;
     }
 
-    Tokenizer import_tokenizer = new_tokenizer(import_path.data, input_content, parser->tokenizer->messages);
-    Tokenizer* const tokenizer = parser->tokenizer;
-    parser->tokenizer = &import_tokenizer;
-
-    Scope* scope = new_scope(NULL);
-    scope->children = collect_until(parser, &statement, 0, 0);
-    parser->tokenizer = tokenizer;
-    return (void*) scope;
+    push(parser->tokenizer->messages,
+         REPORT_ERR(full_trace, strf(0, "unable to open or read '%.*s'", PRINT(import_path))));
+    return new_node((Node) { NodeNone });
 }
 
 Node* keyword_return(const Token token, Parser* parser) {

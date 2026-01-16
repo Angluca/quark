@@ -8,6 +8,8 @@ NodeVector collect_until(Parser* parser, Node* (*supplier)(Parser*), char separa
 
 Node* statement(Parser* parser);
 
-extern char* global_library_path;
+typedef Vector(char*) CStringVector;
+
+extern CStringVector global_library_paths;
 
 #endif
