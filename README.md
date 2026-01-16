@@ -1,7 +1,7 @@
 <div align="center">
     <img alt="Quark Programming Language" src="assets/title.png" width="600px" />
 
-[Homepage](https://quar.k.vu) | [Docs](https://quar.k.vu/docs.html) | [Contributing](CONTRIBUTING.md)
+[Homepage](https://quar.k.vu) | [Quick Start](https://quar.k.vu/docs.html#quick-start) | [Standard Library](https://quar.k.vu/lib.html) | [Contributing](CONTRIBUTING.md)
 </div>
 
 > [!IMPORTANT]
