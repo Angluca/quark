@@ -1,7 +1,7 @@
 <div align="center">
     <img alt="Quark Programming Language" src="assets/title.png" width="600px" />
 
-[Homepage](https://quar.k.vu) | [Docs](https://quar.k.vu/docs.html) | [Contributing](CONTRIBUTING.md)
+[Homepage](https://quar.k.vu) | [Quick Start](https://quar.k.vu/docs.html#quick-start) | [Standard Library](https://quar.k.vu/lib.html) | [Contributing](CONTRIBUTING.md)
 </div>
 
 > [!IMPORTANT]
@@ -13,39 +13,19 @@
 
 ## Building the Compiler
 
-To build the Compiler:
-
-```sh
-make # or specify executable name
-make QC=my_executable
-
-./qc -h
-```
-
-## Compiling a Source File to C:
-
-```sh
-export QUARK_ROOT=/path/to/quark
-export PATH=$PATH:$QUARK_ROOT
-
-qc -h
-qc /path/to/input.qk -o /path/to/output.c -l $QUARK_ROOT
-```
-
-## Learn More
-
-See the [standard library](lib) for examples of the language in use or visit the [docs](https://quar.k.vu/docs.html).
+Follow the [Quick Start Guide](https://quar.k.vu/docs.html#quick-start) to start programming in Quark!
 
 ### Other Repositories
 
 - [quark-programming/quark-docs](https://github.com/quark-programming/quark-docs) - Documentation Website for the Quark
 Programming Language
-
-
 - [Angluca/quark.vim](https://github.com/Angluca/quark.vim) - Vim plugin for Quark language
 - [Angluca/quark_template](https://github.com/Angluca/quark_template) - Project template for Quark-lang
-- [Angluca/quark_raylib_template](https://github.com/Angluca/quark_raylib_template) - A template for using Quark with 
-Raylib
+
+### Projects / Examples
+- [ephf/quark-web-server](https://github.com/ephf/quark-web-server) - A Web Server Implemented in Quark
+- [Angluca/quark_raylib_template](https://github.com/Angluca/quark_raylib_template) - A template for using Quark with Raylib
+
 
 ## Contributing
 
