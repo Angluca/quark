@@ -65,7 +65,8 @@ void compile_identifier(const Identifier identifier, String* line) {
 
     if(identifier.function_declaration_counter) strf(&result, "%u", identifier.function_declaration_counter);
 
-    if(!identifier.function_declaration_counter && identifier.parent_declaration->id == NodeFunctionDeclaration) {
+    if(!identifier.is_external && !identifier.function_declaration_counter
+       && identifier.parent_declaration->id == NodeFunctionDeclaration) {
         const size_t initial_size = result.size;
         unsigned counter = 0;
         Declaration** existing_declaration;

@@ -105,6 +105,18 @@ Node* lefthand_expression(Parser* parser) {
             });
         }
 
+        case '-': {
+            Node* expr = righthand_expression(lefthand_expression(parser), parser, 2);
+            return new_node((Node) {
+                .Wrapper = {
+                    .id = WrapperSurround,
+                    .type = expr->type,
+                    .trace = expr->trace,
+                    .Surround = { expr, String("-") },
+                }
+            });
+        }
+
         default:
             push(parser->tokenizer->messages, REPORT_ERR(token.trace,
                      strf(0, "expected a \33[35mliteral\33[0m, but got '\33[35m%.*s\33[0m'",

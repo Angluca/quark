@@ -6,6 +6,8 @@ type i32 = extern int int32_t;
 type u32 = extern int uint32_t;
 type i64 = extern int int64_t;
 type u64 = extern int uint64_t;
+type iMAX = extern int intmax_t;
+type uMAX = extern int intmax_t;
 
 type f32 = extern int float;
 type f64 = extern int double;
@@ -23,6 +25,8 @@ type Int = extern int int;
 type UInt = extern int unsigned;
 type Long = extern int long;
 type ULong = extern int "unsigned long";
+type LongLong = extern int "long long";
+type ULongLong = extern int "unsigned long long";
 
 type bool = extern int bool;
 type File = extern FILE;
